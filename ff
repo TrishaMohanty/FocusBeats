@@ -1,0 +1,265 @@
+
+ 🚀 FOCUSBEATS – FINAL DETAILED SYSTEM FLOW
+
+ 🧍‍♀️ 1. USER ENTRY
+
+ User opens FocusBeats
+ Lands on Landing Page
+
+👉 Actions:
+
+ Login
+ Register
+
+
+ 🔐 2. AUTHENTICATION FLOW
+
+ New User:
+
+ Register → Create account
+ Auto-login → Redirect to Dashboard
+
+ Existing User:
+
+ Login → Redirect to Dashboard
+
+
+ 🏠 3. DASHBOARD (CONTROL CENTER)
+
+ 📊 DATA DISPLAYED:
+
+ Today’s Study Time
+ Total Sessions Completed
+ Focus Score
+ Study Streak
+ Pending Tasks
+ Last Session Summary
+Also in dashboard some pre configured settings for quick start 
+These are first default with some type but user can also make and add changes to it 
+
+
+ 🎯 ACTIONS:
+
+ ▶ Start Session
+ 📝 Manage Tasks
+ 📊 View Analytics
+ ⚙ Settings
+
+
+ 🎯 4. START SESSION FLOW (STEP-BY-STEP FORM)
+
+👉 Single screen with step-by-step inputs:
+
+
+ Step 1: Select Focus Level
+
+ Low
+ Medium
+ High
+
+
+ Step 2: Select Study Activity
+
+ Reading
+ Coding
+ Revision
+ Problem Solving
+ Night Study
+
+
+ Step 3: Select Duration ⏱️
+
+Options:
+
+ 25 min (default)
+ 1 hour
+ 2 hours
+ 3 hours
+ ♾️ Infinity Mode
+
+
+ ⚡ Infinity Mode Logic:
+
+ No fixed end time
+ Pomodoro cycles continue (25/5)
+ User manually ends session
+
+
+ 👉 Click: Start Session
+
+
+ ⚙️ 5. SYSTEM PROCESS (AUTOMATIC)
+
+ Selects music based on:
+
+   Focus Level + Activity
+ Starts:
+
+   Timer
+   Music playback
+ Creates session record
+
+
+ 🎧 6. ACTIVE SESSION SCREEN (FOCUS MODE)
+
+ 🎵 Music Section:
+
+ Auto-play recommended track
+ Controls:
+
+   Play / Pause
+   Skip
+   Change category
+
+
+ ⏱️ Timer Section:
+
+ Countdown timer
+ Pomodoro cycle indicator
+ Break alerts
+
+
+ 🎮 Controls:
+
+ Pause Session
+ Resume Session
+ End Session
+
+
+
+ ⏸️ 7. SESSION STATES (IMPORTANT)
+
+ ▶ Running
+
+ Timer + Music active
+
+ ⏸️ Paused
+
+ Timer stopped
+ Music paused
+
+ 🔁 Resume
+
+ Continue from same time
+
+
+ ⚠️ Special Case:
+
+If user refreshes or leaves:
+👉 Show:
+
+ “Resume Session” on dashboard
+
+
+
+ ✅ 8. SESSION END
+
+ Two ways:
+
+ 1. Auto End
+
+ Timer completes
+
+ 2. Manual End
+
+ User clicks “End Session”
+
+
+
+ 📊 9. AFTER SESSION PROCESSING
+
+System calculates:
+
+ 🎯 Focus Score based on:
+
+ Session completion
+ Duration followed
+ Task completion
+ Consistency
+
+
+ 💾 Stores:
+
+ Session duration
+ Breaks taken
+ Music used
+ User behavior
+
+
+
+ 📤 10. OUTPUT TO USER
+
+ 📊 Session Summary Screen:
+
+ Time studied
+ Focus Score
+ Tasks completed
+ Performance feedback
+
+
+ 🏠 Dashboard Updated:
+
+ Study stats updated
+ Analytics updated
+
+
+ 📈 Analytics:
+
+ Daily / Weekly graphs
+ Focus trends
+
+
+ 💬 Motivation:
+
+ Quote / encouragement
+
+
+
+ 🔄 FINAL COMPLETE FLOW (BEST VERSION)
+
+```id="rsgn3r"
+Landing Page
+   ↓
+Login / Register
+   ↓
+Dashboard (Stats + Actions)
+   ↓
+Start Session
+   ↓
+Input Form:
+   - Focus Level
+   - Study Activity
+   - Duration (including Infinity)
+   ↓
+System:
+   - Auto-select music
+   - Start timer (Pomodoro logic)
+   ↓
+Active Session Screen:
+   - Music + Timer + Controls
+   ↓
+Session Ends (Auto / Manual)
+   ↓
+Focus Score Calculation
+   ↓
+Session Summary
+   ↓
+Dashboard + Analytics Update
+```
+
+
+ 🧠 🔥 BEST VIVA EXPLANATION
+
+> “The user logs in, starts a session by selecting focus level, activity, and duration including an infinity mode. The system automatically recommends music and runs a Pomodoro-based session. User interactions are tracked, and after completion, a focus score and analytics are generated.”
+
+
+ ⚡ WHAT MAKES YOUR SYSTEM UNIQUE
+
+👉 You should say this:
+
+ Custom duration + infinity mode
+ Smart music recommendation
+ Pomodoro integration
+ Real-time tracking
+ Focus score system
+
