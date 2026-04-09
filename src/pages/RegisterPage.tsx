@@ -27,14 +27,14 @@ export function RegisterPage() {
         <div className="w-16 h-16 mx-auto bg-primary-container rounded-2xl flex items-center justify-center text-white mb-4">
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
         </div>
-        <h2 className="text-3xl font-black text-on-surface">Create your account</h2>
-        <p className="mt-2 text-sm text-slate-500">
+        <h2 className="text-3xl font-black">Create your account</h2>
+        <p className="mt-2 text-sm text-on-surface-muted">
           Start your focus journey today
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-surface-container-lowest py-8 px-4 rounded-3xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] sm:px-10 border border-outline-variant/10">
+        <div className="bg-surface py-8 px-4 rounded-3xl sm:px-10 border border-outline">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-error-container text-on-error-container p-3 rounded-xl text-sm font-bold text-center">
@@ -42,35 +42,35 @@ export function RegisterPage() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-2">Display Name</label>
+              <label className="block text-sm font-bold mb-2">Display Name</label>
               <input
                 type="text"
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none placeholder:text-on-surface-muted/50"
                 placeholder="Alex"
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-2">Email address</label>
+              <label className="block text-sm font-bold mb-2">Email address</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none placeholder:text-on-surface-muted/50"
                 placeholder="alex@example.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-2">Password</label>
+              <label className="block text-sm font-bold mb-2">Password</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none"
               />
             </div>
             <button

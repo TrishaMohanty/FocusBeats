@@ -214,7 +214,7 @@ export function TimerPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-col items-center justify-center min-h-[60vh] bg-white dark:bg-slate-900 rounded-[48px] p-12 border border-outline-variant/10 shadow-[0px_32px_64px_rgba(25,28,29,0.06)] relative overflow-hidden">
+          <div className="lg:col-span-2 flex flex-col items-center justify-center min-h-[60vh] bg-surface rounded-[48px] p-12 border border-outline relative overflow-hidden transition-colors">
             
             {sessionMetadata.is_infinity && (
                 <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-full animate-pulse border border-primary/20">
@@ -232,7 +232,7 @@ export function TimerPage() {
                       stroke="currentColor"
                       strokeWidth="12"
                       fill="transparent"
-                      className="text-surface-container-low"
+                      className="text-surface-low"
                     />
                     <circle
                       cx="192"
@@ -244,7 +244,7 @@ export function TimerPage() {
                       strokeDasharray={1068}
                       strokeDashoffset={1068 - (1068 * progress) / 100}
                       strokeLinecap="round"
-                      className={`${sessionType === 'work' ? 'text-primary' : 'text-emerald-500'} transition-all duration-300`}
+                      className={`${sessionType === 'work' ? 'text-primary' : 'text-emerald-500'} transition-all duration-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]`}
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -265,7 +265,7 @@ export function TimerPage() {
               <button
                 className={`w-28 h-28 rounded-[40px] flex items-center justify-center shadow-2xl transition-all active:scale-90 ${
                   isRunning 
-                    ? 'bg-white dark:bg-slate-800 text-on-surface border border-outline-variant/10 shadow-lg' 
+                    ? 'bg-surface text-on-surface border border-outline' 
                     : 'bg-gradient-to-br from-primary to-primary-container text-white shadow-primary/30'
                 }`}
                 onClick={toggleTimer}
@@ -287,16 +287,16 @@ export function TimerPage() {
           </div>
 
           <div className="space-y-6">
-              <div className="bg-gradient-to-br from-[#191C1D] to-[#2E3132] rounded-[40px] p-8 text-white relative overflow-hidden group border border-[#BBCABF]/10">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
+               <div className="bg-surface-high rounded-[40px] p-8 text-on-surface relative overflow-hidden group border border-outline">
+                  <div className="absolute right-0 top-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
                   
                   <div className="relative z-10">
                       <div className="flex justify-between items-start mb-10">
                           <div>
-                              <p className="text-[10px] uppercase font-black tracking-widest text-[#BBCABF]">Smart Audio</p>
+                              <p className="text-[10px] uppercase font-black tracking-widest text-on-surface-muted">Smart Audio</p>
                               <h3 className="text-xl font-bold tracking-tight">Now Playing</h3>
                           </div>
-                          <div className={`w-3 h-3 rounded-full ${isPlayingMusic ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`}></div>
+                          <div className={`w-3 h-3 rounded-full ${isPlayingMusic ? 'bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20' : 'bg-on-surface-muted'}`}></div>
                       </div>
 
                       {nowPlaying && (
@@ -334,19 +334,19 @@ export function TimerPage() {
                   </div>
               </div>
 
-              {!sessionMetadata.is_infinity && (
-                 <div className="bg-surface-container-low rounded-[32px] p-8 border border-outline-variant/10">
+                  {!sessionMetadata.is_infinity && (
+                 <div className="bg-surface-low rounded-[32px] p-8 border border-outline">
                      <div className="flex justify-between items-center mb-4">
                          <span className="text-sm font-bold">Session Progress</span>
                          <span className="text-xs font-black text-primary">{Math.round(progress)}%</span>
                      </div>
-                     <div className="h-4 bg-surface-container-highest rounded-full overflow-hidden">
+                     <div className="h-4 bg-surface-high rounded-full overflow-hidden">
                          <div 
                              className="h-full bg-gradient-to-r from-primary to-primary-container rounded-full transition-all duration-1000"
                              style={{ width: `${progress}%` }}
                          />
                      </div>
-                     <p className="text-xs text-slate-500 mt-4 font-medium text-center">
+                     <p className="text-xs text-on-surface-muted mt-4 font-medium text-center">
                          Stay focused! You'll be done at {targetEndTime ? new Date(targetEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}.
                      </p>
                  </div>

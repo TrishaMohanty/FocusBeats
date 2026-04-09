@@ -30,15 +30,15 @@ export function TasksPage() {
       </div>
       
       {!user ? (
-        <div className="p-8 bg-surface-container rounded-2xl text-center border border-outline-variant/20 shadow-sm mt-8">
+        <div className="p-8 bg-surface rounded-2xl text-center border border-outline shadow-sm mt-8">
           <span className="material-symbols-outlined text-6xl text-primary mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock_person</span>
           <h3 className="text-xl font-bold mb-2">Login Required</h3>
-          <p className="text-slate-500 mb-6">You must be logged in to create and manage tasks.</p>
+          <p className="text-on-surface-muted mb-6">You must be logged in to create and manage tasks.</p>
           <button onClick={() => navigate('/login')} className="px-8 py-3 bg-primary text-white rounded-xl font-bold">Sign In</button>
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-slate-500">Your tasks will appear here.</p>
+          <p className="text-on-surface-muted">Your tasks will appear here.</p>
         </div>
       )}
     </>

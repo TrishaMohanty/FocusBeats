@@ -40,21 +40,21 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
       
       {/* Modal */}
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden border border-outline-variant/10 animate-in fade-in zoom-in duration-300">
+      <div className="relative bg-surface w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden border border-outline animate-in fade-in zoom-in duration-300">
         <div className="p-10 space-y-8">
           <div className="text-center">
              <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-2">New Entry</p>
              <h3 className="text-4xl font-black tracking-tighter">Start Session</h3>
-             <p className="text-sm text-slate-500 mt-2">Configure your daily flow and find your focus.</p>
+             <p className="text-sm text-on-surface-muted mt-2">Configure your daily flow and find your focus.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-               <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 px-2">Current Activity</label>
+               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Current Activity</label>
                <select 
                  value={activity}
                  onChange={(e) => setActivity(e.target.value)}
-                 className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 font-bold text-on-surface focus:ring-2 focus:ring-primary/20 appearance-none outline-none"
+                 className="w-full bg-surface-low border border-outline rounded-2xl py-4 px-6 font-bold text-on-surface focus:ring-1 focus:ring-primary/20 appearance-none outline-none"
                >
                  <option value="reading">📖 Reading</option>
                  <option value="coding">💻 Coding</option>
@@ -65,7 +65,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
             </div>
 
             <div>
-               <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 px-2">Focus Intensity</label>
+               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Focus Intensity</label>
                <div className="grid grid-cols-3 gap-2">
                   {['low', 'medium', 'high'].map((level) => (
                     <button
@@ -75,7 +75,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
                       className={`py-3 rounded-xl font-bold text-sm capitalize transition-all ${
                         focusLevel === level 
                           ? 'bg-primary text-white shadow-lg' 
-                          : 'bg-surface-container-low text-slate-500 hover:bg-surface-container-high'
+                          : 'bg-surface-low text-on-surface-muted border border-outline hover:bg-surface-high'
                       }`}
                     >
                       {level}
@@ -85,7 +85,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
             </div>
 
             <div>
-               <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 px-2">Duration ⏱️</label>
+               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Duration ⏱️</label>
                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   {[
                     { label: '25m', value: 25 },
@@ -101,7 +101,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
                       className={`py-3 rounded-xl font-bold text-sm transition-all ${
                         duration === dur.value 
                           ? 'bg-primary text-white shadow-lg' 
-                          : 'bg-surface-container-low text-slate-500 hover:bg-surface-container-high'
+                          : 'bg-surface-low text-on-surface-muted border border-outline hover:bg-surface-high'
                       }`}
                     >
                       {dur.label}

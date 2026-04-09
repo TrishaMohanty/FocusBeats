@@ -74,8 +74,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               </div>
               {!isSidebarCollapsed && (
                   <div className="overflow-hidden">
-                    <h1 className="text-xl font-black tracking-tighter text-[#191C1D] dark:text-white truncate">Editorial</h1>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold truncate">Productivity Suite</p>
+                    <h1 className="text-xl font-black tracking-tighter">Editorial</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-on-surface-muted font-bold truncate">Productivity Suite</p>
                   </div>
               )}
           </div>
@@ -95,8 +95,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-white dark:bg-slate-800 text-primary dark:text-primary-fixed shadow-[0px_12px_32px_rgba(25,28,29,0.04)] font-bold scale-98 active-nav-fill'
-                    : 'text-slate-400 dark:text-slate-500 hover:text-on-surface hover:bg-surface-container-low transition-colors'
+                    ? 'bg-background shadow-xs text-primary font-bold scale-98 active-nav-fill border border-outline'
+                    : 'text-on-surface-muted hover:text-on-surface hover:bg-surface-low transition-colors'
                 } ${isSidebarCollapsed ? 'justify-center px-0' : ''}`}
                 title={isSidebarCollapsed ? item.label : undefined}
               >
@@ -109,7 +109,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
         <div className="mt-auto p-2">
           {isSidebarCollapsed && (
-             <button onClick={toggleSidebar} className="w-full flex justify-center py-4 mb-2 text-slate-400 hover:text-primary">
+             <button onClick={toggleSidebar} className="w-full flex justify-center py-4 mb-2 text-on-surface-muted hover:text-primary">
                  <span className="material-symbols-outlined text-sm">keyboard_double_arrow_right</span>
              </button>
           )}
@@ -134,12 +134,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       {/* Main Canvas */}
       <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         {/* TopNavBar Component */}
-        <header className={`fixed top-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-[#BBCABF]/10 z-40 flex justify-between items-center px-12 transition-all duration-300 ${isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-16rem)]'}`}>
+        <header className={`fixed top-0 right-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline z-40 flex justify-between items-center px-12 transition-all duration-300 ${isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-16rem)]'}`}>
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-full max-w-lg">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-muted text-lg">search</span>
               <input
-                className="w-full bg-surface-container-low border-none rounded-full py-2 pl-12 pr-4 text-xs font-medium focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full bg-surface-low border-none rounded-full py-2 pl-12 pr-4 text-xs font-medium focus:ring-1 focus:ring-primary/20 outline-none"
                 placeholder="Search insights..."
                 type="text"
               />
@@ -149,15 +149,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <button 
                   onClick={() => setIsDarkMode(!isDarkMode)} 
-                  className="text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-2"
+                  className="text-on-surface-muted hover:text-primary transition-colors flex items-center justify-center p-2"
                   title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
               >
                  <span className="material-symbols-outlined text-xl">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
               </button>
-              <button className="text-slate-400 hover:text-primary transition-colors p-2">
+              <button className="text-on-surface-muted hover:text-primary transition-colors p-2">
                 <span className="material-symbols-outlined text-xl">notifications</span>
               </button>
-              <button className="text-slate-400 hover:text-primary transition-colors">
+              <button className="text-on-surface-muted hover:text-primary transition-colors">
                 <span className="material-symbols-outlined">settings</span>
               </button>
             </div>

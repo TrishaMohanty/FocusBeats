@@ -68,10 +68,10 @@ export function DashboardPage() {
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-1">Overview</p>
-          <h2 className="text-5xl font-black tracking-tighter text-on-surface">
+          <h2 className="text-5xl font-black tracking-tighter">
             {user ? `Hello, ${user.display_name || user.email.split('@')[0]}` : 'Welcome, Guest'}
           </h2>
-          <p className="text-slate-500 font-medium mt-2">Ready to find your focus? Here's your metrics for today.</p>
+          <p className="text-on-surface-muted font-medium mt-2">Ready to find your focus? Here's your metrics for today.</p>
         </div>
       </section>
 
@@ -98,27 +98,27 @@ export function DashboardPage() {
 
       {/* Stats Cards - Matching Editorial Mockup Style */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-outline-variant/5">
-          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+        <div className="bg-surface p-8 rounded-[32px] border border-outline relative group hover:border-primary/20 transition-colors">
+          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
             <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Focus Score</p>
+          <p className="text-on-surface-muted text-[10px] font-black uppercase tracking-widest">Focus Score</p>
           <p className="text-4xl font-black mt-1 tracking-tighter">{stats.focusScore}</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-outline-variant/5">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4">
+        <div className="bg-surface p-8 rounded-[32px] border border-outline relative group hover:border-emerald-500/20 transition-colors">
+          <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
             <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sessions</p>
+          <p className="text-on-surface-muted text-[10px] font-black uppercase tracking-widest">Sessions</p>
           <p className="text-4xl font-black mt-1 tracking-tighter">{stats.sessionsToday}</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-outline-variant/5">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
+        <div className="bg-surface p-8 rounded-[32px] border border-outline relative group hover:border-blue-500/20 transition-colors">
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/10 rounded-full flex items-center justify-center text-blue-600 mb-4 group-hover:scale-110 transition-transform">
             <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           </div>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Tasks</p>
+          <p className="text-on-surface-muted text-[10px] font-black uppercase tracking-widest">Tasks</p>
           <p className="text-4xl font-black mt-1 tracking-tighter">{stats.tasksCompleted}</p>
         </div>
 
@@ -136,7 +136,7 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {/* Recent Activity List */}
-          <section className="bg-white dark:bg-slate-900 rounded-[40px] p-10 border border-outline-variant/5">
+          <section className="bg-surface rounded-[40px] p-10 border border-outline">
             <div className="flex justify-between items-center mb-10">
                 <h3 className="text-2xl font-black tracking-tighter">Recent Sessions</h3>
                 <button onClick={() => navigate('/analytics')} className="text-xs font-black text-primary hover:underline uppercase tracking-widest">View Analytics</button>
@@ -150,8 +150,8 @@ export function DashboardPage() {
                 </div>
               ) : (
                 stats.recentSessions.map((session: any) => (
-                    <div key={session._id} className="flex items-center gap-6 p-6 hover:bg-surface-container-low rounded-[24px] transition-all group">
-                        <div className="w-14 h-14 bg-surface-container-low group-hover:bg-white rounded-[20px] flex items-center justify-center text-primary transition-colors">
+                    <div key={session._id} className="flex items-center gap-6 p-6 hover:bg-surface-low rounded-[24px] transition-all group border border-transparent hover:border-outline">
+                        <div className="w-14 h-14 bg-surface-low group-hover:bg-background rounded-[20px] flex items-center justify-center text-primary transition-colors">
                             <span className="material-symbols-outlined text-3xl">{session.activity_type === 'coding' ? 'terminal' : 'book_4'}</span>
                         </div>
                         <div className="flex-1">
@@ -177,12 +177,12 @@ export function DashboardPage() {
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
             <div className="relative z-10 space-y-4">
                 <span className="material-symbols-outlined text-primary text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>format_quote</span>
-                <p className="text-3xl font-black tracking-tight text-on-surface leading-tight max-w-xl">
+                <p className="text-3xl font-black tracking-tight leading-tight max-w-xl">
                     "The way to get started is to quit talking and begin doing."
                 </p>
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-[2px] bg-primary"></div>
-                    <p className="text-xs font-black uppercase tracking-[.2em] text-slate-400">Walt Disney</p>
+                    <p className="text-xs font-black uppercase tracking-[.2em] text-on-surface-muted">Walt Disney</p>
                 </div>
             </div>
           </section>
@@ -191,7 +191,7 @@ export function DashboardPage() {
         {/* Sidebar Widgets */}
         <div className="space-y-8">
             {/* Quick Controls Widget */}
-            <section className="bg-surface-container-low rounded-[40px] p-8 border border-outline-variant/5">
+            <section className="bg-surface-low rounded-[40px] p-8 border border-outline">
                 <h3 className="text-xl font-black tracking-tighter mb-8">Quick Actions</h3>
                 <div className="space-y-3">
                     <button 
@@ -209,7 +209,7 @@ export function DashboardPage() {
                     </button>
                     <button 
                         onClick={() => navigate('/timer', { state: { sessionData: { activity_type: 'reading', focus_level: 'low', task_name: 'Light Reading', duration_minutes: 25, session_type: 'work' } }})}
-                        className="w-full flex items-center justify-between p-5 bg-white dark:bg-slate-800 rounded-[24px] hover:translate-x-2 transition-all font-bold text-sm"
+                        className="w-full flex items-center justify-between p-5 bg-surface rounded-[24px] hover:translate-x-2 transition-all font-bold text-sm border border-transparent hover:border-outline shadow-xs shadow-black/5"
                     >
                         <div className="flex items-center gap-4">
                              <span className="material-symbols-outlined text-emerald-500">book_4</span>
