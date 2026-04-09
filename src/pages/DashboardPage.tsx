@@ -4,9 +4,12 @@ import { api } from '../lib/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SessionSummaryModal } from '../components/SessionSummaryModal';
 
+import { useLayout } from '../contexts/LayoutContext';
+
 export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { openStartModal } = useLayout();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     focusScore: 0,
@@ -23,14 +26,25 @@ export function DashboardPage() {
   const [showSummaryModal, setShowSummaryModal] = useState(!!summaryPayload);
 
   useEffect(() => {
+    // Auto-popup logic: Only show if no active session and not shown in this tab session
+    const hasPrompted = sessionStorage.getItem('focusbeats_auto_prompted');
     const saved = localStorage.getItem('focusbeats_active_session');
+    
     if (saved) {
       try {
         setActiveSession(JSON.parse(saved));
       } catch (e) {
         console.error("Error parsing saved session", e);
       }
+    } else if (!hasPrompted && !loading) {
+      // Small delay for better UX
+      const timer = setTimeout(() => {
+        openStartModal();
+        sessionStorage.setItem('focusbeats_auto_prompted', 'true');
+      }, 1500);
+      return () => clearTimeout(timer);
     }
+
     if (user && !isFetched.current) {
       isFetched.current = true;
       api.get('/dashboard')
@@ -40,7 +54,7 @@ export function DashboardPage() {
     } else if (!user) {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, loading, openStartModal]);
 
   if (loading) {
     return (
@@ -62,12 +76,24 @@ export function DashboardPage() {
       />
 
       {/* Welcome Section */}
-      <section className="flex flex-col gap-2">
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Overview</p>
-        <h2 className="text-4xl font-extrabold text-text tracking-tight">
-          {user ? `Hello, ${user.display_name || user.email.split('@')[0]}` : 'Welcome, Guest'}
-        </h2>
-        <p className="text-lg text-text-muted">Ready to find your focus? Here are your metrics for today.</p>
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Overview</p>
+          <h2 className="text-4xl font-extrabold text-text tracking-tight">
+            {user ? `Hello, ${user.display_name || user.email.split('@')[0]}` : 'Welcome, Guest'}
+          </h2>
+          <p className="text-lg text-text-muted">Ready to find your focus? Here are your metrics for today.</p>
+        </div>
+        
+        {!activeSession && (
+          <button 
+            onClick={openStartModal}
+            className="px-8 py-4 bg-primary-500 text-white font-black rounded-2xl flex items-center gap-3 hover:bg-primary-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary-500/20 group"
+          >
+            <span className="material-symbols-rounded text-2xl group-hover:rotate-90 transition-transform">add</span>
+            Start New Session
+          </button>
+        )}
       </section>
 
       {/* Resume Session Banner */}

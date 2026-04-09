@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLayout } from '../contexts/LayoutContext';
 import { StartSessionModal } from './StartSessionModal';
-
 import { MusicPlayer } from './MusicPlayer';
+import { RightPanel } from './RightPanel';
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
@@ -18,7 +19,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isStartModalOpen, openStartModal, closeStartModal } = useLayout();
   const [isAccountPopupOpen, setIsAccountPopupOpen] = useState(false);
 
   // Theme state
@@ -85,9 +86,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="bg-bg min-h-screen text-text font-sans selection:bg-primary-500/30">
+    <div className="bg-bg min-h-screen text-text font-sans selection:bg-primary-500/30 app-grid">
       {/* SideNavBar Component */}
-      <aside className={`h-screen fixed left-0 top-0 bg-surface flex flex-col p-4 gap-2 border-r border-border transition-all duration-300 group/sidebar
+      <aside className={`grid-area-sidebar h-screen bg-surface flex flex-col p-4 gap-2 border-r border-border transition-all duration-300 group/sidebar
         ${sidebarMode === 'auto-hide' ? 'z-[60] -translate-x-[calc(100%-4px)] hover:translate-x-0 !shadow-2xl' : 'z-50'}
         ${isSidebarCollapsed ? 'w-20' : 'w-72'}`}>
         
@@ -144,12 +145,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </div>
-
         </nav>
 
         <div className="mt-auto">
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={openStartModal}
             className={`w-full py-4 bg-primary-500 text-white rounded-xl font-black text-sm tracking-tight flex items-center justify-center gap-2 shadow-[0_4px_12px_var(--color-primary-500)] shadow-primary-500/30 hover:scale-[1.02] active:scale-95 transition-transform ${isSidebarCollapsed ? 'px-0' : 'px-4'}`}
             title={isSidebarCollapsed ? "New Entry" : undefined}
           >
@@ -161,148 +161,142 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
       {/* Start Session Modal */}
       <StartSessionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isStartModalOpen}
+        onClose={closeStartModal}
         onStart={handleStartSession}
       />
 
-      {/* Main Canvas */}
-      <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 
-        ${sidebarMode === 'auto-hide' ? 'ml-0' : (isSidebarCollapsed ? 'ml-20' : 'ml-72')}`}>
-        
-        {/* Invisible Overlay for Account Popup to handle outside clicks */}
-        {isAccountPopupOpen && (
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsAccountPopupOpen(false)}
-          />
-        )}
-
-        {/* TopNavBar Component */}
-        <header className={`fixed top-0 right-0 h-20 bg-bg/80 backdrop-blur-xl border-b border-border z-40 flex justify-between items-center px-8 transition-all duration-300 
-          ${sidebarMode === 'auto-hide' ? 'w-full' : (isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-18rem)]')}`}>
-          <div className="flex items-center gap-4">
-            <div className="flex justify-center items-center px-4 py-2 bg-surface border border-border/60 rounded-xl shadow-subtle focus-within:border-primary-500/50 focus-within:shadow-[0_0_15px_rgba(16,185,129,0.1)] transition-all group">
-              <span className="material-symbols-rounded text-text-muted text-[20px] group-focus-within:text-primary-500 transition-colors">search</span>
-              <input
-                className="bg-transparent border-none outline-none text-text placeholder:text-text-muted/60 w-64 ml-2 font-medium text-sm"
-                placeholder="Search focus sessions..."
-                type="text"
-              />
-            </div>
+      {/* Header NavBar Component */}
+      <header className={`grid-area-header h-20 bg-bg/80 backdrop-blur-xl border-b border-border z-40 flex justify-between items-center px-8 transition-all duration-300`}>
+        <div className="flex items-center gap-4">
+          <div className="flex justify-center items-center px-4 py-2 bg-surface border border-border/60 rounded-xl shadow-subtle focus-within:border-primary-500/50 focus-within:shadow-[0_0_15px_rgba(16,185,129,0.1)] transition-all group">
+            <span className="material-symbols-rounded text-text-muted text-[20px] group-focus-within:text-primary-500 transition-colors">search</span>
+            <input
+              className="bg-transparent border-none outline-none text-text placeholder:text-text-muted/60 w-64 ml-2 font-medium text-sm"
+              placeholder="Search focus sessions..."
+              type="text"
+            />
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 bg-surface p-1 rounded-xl border border-border">
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-bg transition-colors"
-                title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
-              >
-                <span className="material-symbols-rounded text-[22px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-              </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-bg transition-colors">
-                <span className="material-symbols-rounded text-[22px]">notifications</span>
-              </button>
-              <button 
-                onClick={() => navigate('/settings')}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg hover:bg-bg transition-colors ${location.pathname === '/settings' ? 'text-primary-500 bg-primary-500/5' : 'text-text-muted hover:text-text'}`}
-              >
-                <span className="material-symbols-rounded text-[22px]" style={location.pathname === '/settings' ? { fontVariationSettings: "'FILL' 1" } : {}}>settings</span>
-              </button>
-            </div>
-            <div className="w-px h-8 bg-border"></div>
-            
-            <div className="relative flex items-center z-50">
-              <div 
-                className="flex items-center group cursor-pointer"
-                onClick={() => setIsAccountPopupOpen(!isAccountPopupOpen)}
-              >
-                <div className="flex flex-col items-end mr-3">
-                  <p className="text-sm font-bold text-text group-hover:text-primary-500 transition-colors">{user ? user.display_name : 'Guest Account'}</p>
-                </div>
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-lg border-2 transition-colors shadow-sm ${
-                  isAccountPopupOpen 
-                    ? 'border-primary-500 bg-primary-100 text-primary-700' 
-                    : 'bg-primary-50 text-primary-600 border-primary-200 group-hover:border-primary-400 group-hover:bg-primary-100'
-                }`}>
-                  {user ? (
-                    <div>{user.email[0].toUpperCase()}</div>
-                  ) : (
-                    <span className="material-symbols-rounded">person</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Account Dropdown / Popup */}
-              {isAccountPopupOpen && (
-                <div 
-                  className="absolute top-14 right-0 w-80 bg-surface border border-border shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] rounded-2xl p-md animate-in fade-in slide-in-from-top-2 duration-200 cursor-default" 
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {user ? (
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center gap-3 border-b border-border pb-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-lg border border-primary-200">
-                          {user.email[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-text">{user.display_name}</p>
-                          <p className="text-xs text-text-muted truncate w-48">{user.email}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={handleLogout} 
-                        className="w-full py-2.5 bg-error/10 text-error hover:bg-error/20 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-rounded text-[20px]">logout</span>
-                        Log Out
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-start gap-3 border-b border-border pb-3">
-                        <div className="w-10 h-10 rounded-full bg-warning/10 text-warning flex items-center justify-center flex-shrink-0 mt-1">
-                          <span className="material-symbols-rounded" style={{ fontVariationSettings: "'FILL' 1" }}>no_accounts</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-text mb-1">Guest Account</p>
-                          <p className="text-xs text-text-muted leading-relaxed">
-                            Your sessions are not being saved. Guests cannot track focus trends, use the planner, or sync data across devices.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link 
-                          to="/login" 
-                          onClick={() => setIsAccountPopupOpen(false)}
-                          className="flex-1 py-2.5 bg-bg border border-border hover:bg-surface rounded-xl font-bold text-sm text-center transition-colors text-text"
-                        >
-                          Log In
-                        </Link>
-                        <Link 
-                          to="/register" 
-                          onClick={() => setIsAccountPopupOpen(false)}
-                          className="flex-1 py-2.5 bg-primary-500 text-white hover:bg-primary-600 rounded-xl font-bold text-sm text-center shadow-sm shadow-primary-500/20 transition-colors"
-                        >
-                          Sign Up
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-          </div>
-        </header>
-
-        {/* Content Area */}
-        <div className="pt-20">
-          {children}
         </div>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 bg-surface p-1 rounded-xl border border-border">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-bg transition-colors"
+              title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            >
+              <span className="material-symbols-rounded text-[22px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+            </button>
+            <button className="w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-bg transition-colors">
+              <span className="material-symbols-rounded text-[22px]">notifications</span>
+            </button>
+            <button 
+              onClick={() => navigate('/settings')}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg hover:bg-bg transition-colors ${location.pathname === '/settings' ? 'text-primary-500 bg-primary-500/5' : 'text-text-muted hover:text-text'}`}
+            >
+              <span className="material-symbols-rounded text-[22px]" style={location.pathname === '/settings' ? { fontVariationSettings: "'FILL' 1" } : {}}>settings</span>
+            </button>
+          </div>
+          <div className="w-px h-8 bg-border"></div>
+          
+          <div className="relative flex items-center z-50">
+            <div 
+              className="flex items-center group cursor-pointer"
+              onClick={() => setIsAccountPopupOpen(!isAccountPopupOpen)}
+            >
+              <div className="flex flex-col items-end mr-3">
+                <p className="text-sm font-bold text-text group-hover:text-primary-500 transition-colors">{user ? user.display_name : 'Guest Account'}</p>
+              </div>
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-lg border-2 transition-colors shadow-sm ${
+                isAccountPopupOpen 
+                  ? 'border-primary-500 bg-primary-100 text-primary-700' 
+                  : 'bg-primary-50 text-primary-600 border-primary-200 group-hover:border-primary-400 group-hover:bg-primary-100'
+              }`}>
+                {user ? (
+                  <div>{user.email[0].toUpperCase()}</div>
+                ) : (
+                  <span className="material-symbols-rounded">person</span>
+                )}
+              </div>
+            </div>
+
+            {/* Account Dropdown */}
+            {isAccountPopupOpen && (
+              <div 
+                className="absolute top-14 right-0 w-80 bg-surface border border-border shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] rounded-2xl p-md animate-in fade-in slide-in-from-top-2 duration-200" 
+                onClick={(e) => e.stopPropagation()}
+              >
+                {user ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3 border-b border-border pb-3">
+                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-lg border border-primary-200">
+                        {user.email[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text">{user.display_name}</p>
+                        <p className="text-xs text-text-muted truncate w-48">{user.email}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full py-2.5 bg-error/10 text-error hover:bg-error/20 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-rounded text-[20px]">logout</span>
+                      Log Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-3 border-b border-border pb-3">
+                      <div className="w-10 h-10 rounded-full bg-warning/10 text-warning flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="material-symbols-rounded" style={{ fontVariationSettings: "'FILL' 1" }}>no_accounts</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text mb-1">Guest Account</p>
+                        <p className="text-xs text-text-muted leading-relaxed">
+                          Your sessions are not being saved. Guests cannot track focus trends, use the planner, or sync data across devices.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link 
+                        to="/login" 
+                        onClick={() => setIsAccountPopupOpen(false)}
+                        className="flex-1 py-2.5 bg-bg border border-border hover:bg-surface rounded-xl font-bold text-sm text-center transition-colors text-text"
+                      >
+                        Log In
+                      </Link>
+                      <Link 
+                        to="/register" 
+                        onClick={() => setIsAccountPopupOpen(false)}
+                        className="flex-1 py-2.5 bg-primary-500 text-white hover:bg-primary-600 rounded-xl font-bold text-sm text-center shadow-sm shadow-primary-500/20 transition-colors"
+                      >
+                        Sign Up
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Component */}
+      <main className="grid-area-main p-8 no-scrollbar">
+        {isAccountPopupOpen && (
+          <div className="fixed inset-0 z-40" onClick={() => setIsAccountPopupOpen(false)} />
+        )}
+        {children}
       </main>
 
-      <MusicPlayer />
+      {/* Right Panel Component */}
+      <RightPanel />
+
+      {/* Music Player Dock */}
+      <div className="grid-area-music border-t border-border bg-surface/50 backdrop-blur-sm px-8 py-2">
+        <MusicPlayer />
+      </div>
     </div>
   );
 }

@@ -130,4 +130,37 @@
   .glow-on-hover:hover {
     box-shadow: var(--shadow-glow);
   }
+
+  /* Global App Grid System */
+  .app-grid {
+    display: grid;
+    grid-template-areas: 
+      "sidebar header header"
+      "sidebar main   right"
+      "sidebar music  right";
+    grid-template-columns: auto 1fr 340px;
+    grid-template-rows: 80px 1fr auto;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .grid-area-sidebar { grid-area: sidebar; }
+  .grid-area-header { grid-area: header; }
+  .grid-area-main { grid-area: main; overflow-y: auto; }
+  .grid-area-music { grid-area: music; }
+  .grid-area-right { grid-area: right; }
+
+  /* Mobile/Tablet Fallback (Simpler stacking) */
+  @media (max-width: 1024px) {
+    .app-grid {
+      grid-template-areas: 
+        "header"
+        "main"
+        "music";
+      grid-template-columns: 1fr;
+      grid-template-rows: 80px 1fr auto;
+    }
+    .grid-area-sidebar { display: none; }
+    .grid-area-right { display: none; }
+  }
 }

@@ -21,7 +21,7 @@ export function TimerPage() {
     return { activity_type: 'coding', focus_level: 'medium', task_name: 'Deep Work', duration_minutes: 25, session_type: 'work', is_infinity: false };
   };
 
-  const { playTrack, currentTrack, isPlaying } = useAudio();
+  const { isPlaying } = useAudio();
   const [sessionMetadata] = useState<any>(getInitialSession());
   const [sessionType, setSessionType] = useState<'work' | 'short_break'>('work');
 
@@ -34,16 +34,6 @@ export function TimerPage() {
     const saved = localStorage.getItem('focusbeats_target_end_time');
     return saved ? parseInt(saved, 10) : null;
   });
-
-  const [upcomingTracks, setUpcomingTracks] = useState<any[]>([]);
-  const [loadingTracks, setLoadingTracks] = useState(true);
-  const [stickyNote, setStickyNote] = useState(() => {
-    return localStorage.getItem('focusbeats_timer_note') || "";
-  });
-
-  useEffect(() => {
-    localStorage.setItem('focusbeats_timer_note', stickyNote);
-  }, [stickyNote]);
 
   useEffect(() => {
     if (!targetEndTime) {
@@ -69,19 +59,13 @@ export function TimerPage() {
   }, [isRunning]);
 
   useEffect(() => {
-    setLoadingTracks(true);
     const { activity_type, focus_level } = sessionMetadata;
     
     api.get(`/music?activity_type=${activity_type}&focus_level=${focus_level}`)
-      .then(data => {
-        const tracksWithMatch = data.map((t: any) => ({
-          ...t,
-          match: Math.floor(Math.random() * (99 - 80 + 1)) + 80
-        })).sort((a: any, b: any) => b.match - a.match);
-        setUpcomingTracks(tracksWithMatch);
+      .then(() => {
+        // We can still fetch music if we want to play it, but we've removed the manual queue for now.
       })
-      .catch(console.error)
-      .finally(() => setLoadingTracks(false));
+      .catch(console.error);
   }, [sessionMetadata]);
 
   useEffect(() => {
@@ -198,15 +182,15 @@ export function TimerPage() {
   const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.20)-112px)] flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden px-8">
+    <div className="h-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden px-4 md:px-8">
       
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-xl h-full items-center min-h-0">
+      <div className="w-full max-w-4xl flex flex-col items-center justify-center h-full min-h-0 py-8">
         
-        {/* Left: The Watch (col-span-12 on mobile, col-span-8 on desktop) */}
-        <div className="lg:col-span-8 flex flex-col items-center justify-center relative">
+        {/* The Watch */}
+        <div className="flex flex-col items-center justify-center relative w-full">
           
-          {/* Internal Watch Container (Squeezed for standard viewports) */}
-          <div className="relative flex items-center justify-center w-full max-w-[min(50vh,360px)] aspect-square mb-4">
+          {/* Internal Watch Container */}
+          <div className="relative flex items-center justify-center w-full max-w-[min(60vh,420px)] aspect-square mb-12">
             
             {/* Progress Ring with Breathing Effect */}
             <svg className="w-full h-full transform -rotate-90 filter drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -286,94 +270,6 @@ export function TimerPage() {
             >
               <span className="material-symbols-rounded text-3xl group-hover:rotate-90 transition-transform">stop</span>
             </button>
-          </div>
-        </div>
-
-        {/* Right Panel: Sticky Note + Scrollable Queue */}
-        <div className="hidden lg:flex lg:col-span-4 flex-col h-full pt-1 pb-12 gap-6 overflow-hidden">
-          
-          {/* Layer 1: Sticky Note (Fixed at top of panel) */}
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-between mb-2 px-1">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Sticky Note</h4>
-              <span className="material-symbols-rounded text-base text-amber-400">push_pin</span>
-            </div>
-            <div className="bg-amber-100/40 dark:bg-amber-900/20 border border-amber-300/40 dark:border-amber-800/40 p-5 rounded-3xl shadow-sm relative group transition-all hover:shadow-md">
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-40 transition-opacity">
-                <span className="material-symbols-rounded text-base text-amber-900 dark:text-amber-100">edit_note</span>
-              </div>
-              <p className="text-[10px] font-black text-amber-900/80 dark:text-amber-200 uppercase tracking-[0.2em] mb-3">Goal Objective</p>
-              <textarea 
-                className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] font-bold text-amber-950 dark:text-amber-50 resize-none placeholder:text-amber-900/25 dark:placeholder:text-amber-200/20 leading-relaxed no-scrollbar"
-                placeholder="Write your session focus here..."
-                rows={3}
-                value={stickyNote}
-                onChange={(e) => setStickyNote(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Layer 2: Smart Queue (Scrollable) */}
-          <div className="flex-1 flex flex-col min-h-0 relative">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Audio Queue</h4>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 -mr-2 no-scrollbar space-y-4 pb-20 relative">
-              {loadingTracks ? (
-                <div className="py-20 flex flex-col items-center justify-center gap-4">
-                  <span className="material-symbols-rounded animate-spin text-primary-500 text-3xl">refresh</span>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Loading Tracks...</p>
-                </div>
-              ) : upcomingTracks.map((track) => (
-                <div 
-                  key={track._id} 
-                  onClick={() => playTrack(track)}
-                  className={`bg-surface border p-4 rounded-2xl shadow-sm transition-all group cursor-pointer hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-4 ${
-                    currentTrack?._id === track._id ? 'border-primary-500 ring-4 ring-primary-500/5' : 'border-border hover:border-primary-400/50'
-                  }`}
-                >
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all shadow-inner overflow-hidden relative ${
-                    currentTrack?._id === track._id && isPlaying ? 'bg-primary-500 text-white' : 'bg-bg text-text-muted group-hover:bg-primary-500 group-hover:text-white'
-                  }`}>
-                    {currentTrack?._id === track._id && isPlaying ? (
-                       <div className="flex items-end gap-[2px] h-4">
-                          <div className="w-1 bg-white animate-[music-bar_0.6s_ease-in-out_infinite] h-2"></div>
-                          <div className="w-1 bg-white animate-[music-bar_0.8s_ease-in-out_infinite] h-4"></div>
-                          <div className="w-1 bg-white animate-[music-bar_0.7s_ease-in-out_infinite] h-3"></div>
-                       </div>
-                    ) : (
-                      <span className="material-symbols-rounded text-3xl">
-                        graphic_eq
-                      </span>
-                    )}
-                    <div className="absolute inset-0 bg-primary-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h5 className="font-black text-text text-[15px] truncate group-hover:text-primary-500 transition-colors">
-                        {track.title}
-                      </h5>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-text-muted truncate uppercase tracking-widest">{track.category}</p>
-                      <div className="w-16 h-1 bg-bg rounded-full overflow-hidden">
-                        <div className="h-full bg-primary-500 rounded-full" style={{ width: `${track.match}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button className="w-full py-5 border-2 border-dashed border-border rounded-2xl text-[11px] font-black text-text-muted hover:border-primary-500/50 hover:text-primary-500 transition-all flex items-center justify-center gap-2 group">
-                <span className="material-symbols-rounded text-lg group-hover:rotate-180 transition-transform">refresh</span>
-                Regenerate Recommendations
-              </button>
-            </div>
-
-            {/* Bottom Blur Mask (Indicates more scroll) */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg via-bg/80 to-transparent pointer-events-none z-10 backdrop-blur-[2px] opacity-90"></div>
           </div>
         </div>
       </div>

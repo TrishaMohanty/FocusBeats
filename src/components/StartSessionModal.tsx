@@ -43,7 +43,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
       ></div>
 
       {/* Modal */}
-      <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] relative z-10 animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface border border-border w-full rounded-2xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] relative z-10 animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
         <div className="p-xl overflow-y-auto custom-scrollbar flex-1">
           <div className="mb-lg">
             <p className="text-xs font-bold uppercase tracking-widest text-primary-500 mb-1">New Entry</p>

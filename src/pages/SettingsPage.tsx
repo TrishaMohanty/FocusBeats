@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function SettingsPage() {
   const [sidebarMode, setSidebarMode] = useState<'fixed' | 'auto-hide'>(() => {
@@ -34,7 +34,7 @@ export function SettingsPage() {
           
           <div className="p-8 space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="max-w-md">
+              <div>
                 <h4 className="text-md font-bold text-text mb-1">Sidebar Interaction</h4>
                 <p className="text-sm text-text-muted leading-relaxed">Choose how the sidebar behaves. 'Auto-hide' maximizes your focus area by hiding the sidebar until you hover.</p>
               </div>

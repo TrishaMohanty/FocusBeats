@@ -11,7 +11,7 @@ export function MusicPlayer() {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 h-18 bg-surface/60 backdrop-blur-2xl border-t border-border/40 z-[60] px-8 flex items-center justify-between animate-in slide-in-from-bottom-full duration-700">
+    <footer className="h-16 flex items-center justify-between w-full">
       
       {/* Left: Track Info (Compact) */}
       <div className="flex items-center gap-3 w-[25%] lg:w-[30%]">
