@@ -18,7 +18,6 @@ export function TimerPage() {
     const saved = localStorage.getItem('focusbeats_active_session');
     if (saved) return JSON.parse(saved);
     
-    // Default fallback
     return { activity_type: 'coding', focus_level: 'medium', task_name: 'Deep Work', duration_minutes: 25, session_type: 'work', is_infinity: false };
   };
 
@@ -26,22 +25,47 @@ export function TimerPage() {
   const [sessionType, setSessionType] = useState<'work' | 'short_break'>('work');
   
   // Timer State
-  const [isRunning, setIsRunning] = useState(true); // Auto-start by default
+  const [isRunning, setIsRunning] = useState(() => {
+    const saved = localStorage.getItem('focusbeats_timer_is_running');
+    return saved === null ? true : saved === 'true';
+  });
   const [timeLeft, setTimeLeft] = useState(0);
-  const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
+  const [targetEndTime, setTargetEndTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem('focusbeats_target_end_time');
+    return saved ? parseInt(saved, 10) : null;
+  });
   
   // Music State
   const [nowPlaying, setNowPlaying] = useState<{title: string, artist: string, genre: string} | null>(null);
-  const [isPlayingMusic, setIsPlayingMusic] = useState(true);
+  const [isPlayingMusic, setIsPlayingMusic] = useState(isRunning);
 
-  // Initialize target time correctly
+  // Initialize or Restore target time correctly
   useEffect(() => {
     if (!targetEndTime) {
+       // Only initialize if we don't have a saved one
        const initialDurationMs = (sessionMetadata.is_infinity ? 25 * 60 : sessionMetadata.duration_minutes * 60) * 1000;
-       setTargetEndTime(Date.now() + initialDurationMs);
+       const newTarget = Date.now() + initialDurationMs;
+       setTargetEndTime(newTarget);
+       localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
        setTimeLeft(initialDurationMs / 1000);
+    } else {
+        // Restore from saved target
+        if (isRunning) {
+            const remaining = Math.max(0, Math.ceil((targetEndTime - Date.now()) / 1000));
+            setTimeLeft(remaining);
+        } else {
+            const savedTimeLeft = localStorage.getItem('focusbeats_time_left');
+            setTimeLeft(savedTimeLeft ? parseInt(savedTimeLeft, 10) : 0);
+        }
     }
+    localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
   }, [sessionMetadata]);
+
+  // Sync isRunning to localStorage
+  useEffect(() => {
+    localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
+    setIsPlayingMusic(isRunning);
+  }, [isRunning]);
 
   // Handle Smart Music Selection
   useEffect(() => {
@@ -84,20 +108,24 @@ export function TimerPage() {
 
   const handleTimerComplete = () => {
       setIsRunning(false);
+      localStorage.removeItem('focusbeats_target_end_time');
+      localStorage.removeItem('focusbeats_time_left');
       
       if (sessionMetadata.is_infinity) {
-          // Auto-Pomodoro Cycle Logic
           if (sessionType === 'work') {
               setSessionType('short_break');
-              setTargetEndTime(Date.now() + 5 * 60 * 1000);
+              const newTarget = Date.now() + 5 * 60 * 1000;
+              setTargetEndTime(newTarget);
+              localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
               setIsRunning(true);
           } else {
               setSessionType('work');
-              setTargetEndTime(Date.now() + 25 * 60 * 1000);
+              const newTarget = Date.now() + 25 * 60 * 1000;
+              setTargetEndTime(newTarget);
+              localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
               setIsRunning(true);
           }
       } else {
-          // Normal mode completes
           endSession(true);
       }
   };
@@ -106,12 +134,15 @@ export function TimerPage() {
       if (isRunning) {
           // Pause
           setIsRunning(false);
-          setIsPlayingMusic(false);
+          localStorage.setItem('focusbeats_time_left', timeLeft.toString());
+          localStorage.removeItem('focusbeats_target_end_time');
       } else {
           // Resume
-          setTargetEndTime(Date.now() + timeLeft * 1000);
+          const newTarget = Date.now() + timeLeft * 1000;
+          setTargetEndTime(newTarget);
+          localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+          localStorage.removeItem('focusbeats_time_left');
           setIsRunning(true);
-          setIsPlayingMusic(true);
       }
   };
 
@@ -120,16 +151,17 @@ export function TimerPage() {
           if (!window.confirm("Are you sure you want to end this session early?")) return;
       }
       
-      // Calculate active time
       let actualDuration = sessionMetadata.duration_minutes;
       if (sessionMetadata.is_infinity) {
-          // For infinity, we might want to store how many minutes they stayed. For MVP, save as 25.
           actualDuration = 25; 
       } else if (!isAutoEnd) {
           actualDuration = Math.round((sessionMetadata.duration_minutes * 60 - timeLeft) / 60);
       }
 
       localStorage.removeItem('focusbeats_active_session');
+      localStorage.removeItem('focusbeats_target_end_time');
+      localStorage.removeItem('focusbeats_time_left');
+      localStorage.removeItem('focusbeats_timer_is_running');
 
       if (user) {
           try {
@@ -148,7 +180,6 @@ export function TimerPage() {
           }
       }
       
-      // Guest or fallback summary
       navigate('/dashboard', { state: { showSummary: {
           duration_minutes: actualDuration,
           focus_score_earned: isAutoEnd ? 10 : 2,
@@ -164,7 +195,6 @@ export function TimerPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Progress logic
   let totalSeconds = sessionMetadata.is_infinity ? (sessionType === 'work' ? 25*60 : 5*60) : sessionMetadata.duration_minutes * 60;
   const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
@@ -184,10 +214,8 @@ export function TimerPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Timer Section */}
           <div className="lg:col-span-2 flex flex-col items-center justify-center min-h-[60vh] bg-white dark:bg-slate-900 rounded-[48px] p-12 border border-outline-variant/10 shadow-[0px_32px_64px_rgba(25,28,29,0.06)] relative overflow-hidden">
             
-            {/* Infinity Badge */}
             {sessionMetadata.is_infinity && (
                 <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-full animate-pulse border border-primary/20">
                     <span className="material-symbols-outlined text-xl">all_inclusive</span>
@@ -195,7 +223,6 @@ export function TimerPage() {
                 </div>
             )}
 
-            {/* Circular Timer with Design Styling */}
             <div className="relative w-96 h-96 flex items-center justify-center mb-16 group">
                 <svg className="w-full h-full transform -rotate-90 drop-shadow-2xl">
                     <circle
@@ -234,7 +261,6 @@ export function TimerPage() {
                 </div>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center gap-12 relative z-10">
               <button
                 className={`w-28 h-28 rounded-[40px] flex items-center justify-center shadow-2xl transition-all active:scale-90 ${
@@ -257,14 +283,10 @@ export function TimerPage() {
               </button>
             </div>
             
-            {/* Background Glow */}
             <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] blur-[120px] rounded-full pointer-events-none transition-colors duration-1000 ${sessionType === 'work' ? 'bg-primary/5' : 'bg-emerald-500/5'}`}></div>
-
           </div>
 
-          {/* Right Sidebar - Music & Helpers */}
           <div className="space-y-6">
-              {/* Smart Music Player */}
               <div className="bg-gradient-to-br from-[#191C1D] to-[#2E3132] rounded-[40px] p-8 text-white relative overflow-hidden group border border-[#BBCABF]/10">
                   <div className="absolute right-0 top-0 w-48 h-48 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
                   
@@ -312,7 +334,6 @@ export function TimerPage() {
                   </div>
               </div>
 
-              {/* Progress Tracker (If not infinity) */}
               {!sessionMetadata.is_infinity && (
                  <div className="bg-surface-container-low rounded-[32px] p-8 border border-outline-variant/10">
                      <div className="flex justify-between items-center mb-4">

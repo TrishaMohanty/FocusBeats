@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { StartSessionModal } from './StartSessionModal';
@@ -16,6 +16,38 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Theme state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+     if (typeof window !== 'undefined') {
+         return localStorage.getItem('theme') === 'dark' || 
+             (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+     }
+     return false;
+  });
+
+  // Sidebar state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+     return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
+
+  useEffect(() => {
+      const root = window.document.documentElement;
+      if (isDarkMode) {
+          root.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+      } else {
+          root.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+      }
+  }, [isDarkMode]);
+
+  const toggleSidebar = () => {
+      setIsSidebarCollapsed(prev => {
+          localStorage.setItem('sidebar_collapsed', String(!prev));
+          return !prev;
+      });
+  };
 
   const handleLogout = async () => {
     try {
@@ -34,15 +66,24 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-[#f8f9fa] dark:bg-[#0e0e0e] text-on-surface flex min-h-screen font-body">
       {/* SideNavBar Component */}
-      <aside className="h-screen w-64 fixed left-0 top-0 bg-white dark:bg-slate-900 flex flex-col p-4 gap-2 z-50 border-r border-[#BBCABF]/10">
-        <div className="flex items-center gap-3 mb-8 px-4 py-4">
-          <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>graphic_eq</span>
+      <aside className={`h-screen fixed left-0 top-0 bg-white dark:bg-slate-900 flex flex-col p-4 gap-2 z-50 border-r border-[#BBCABF]/10 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        <div className={`flex items-center mb-8 px-2 py-4 ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+          <div className="flex items-center gap-3">
+              <div className="w-10 h-10 min-w-10 bg-primary-container rounded-xl flex items-center justify-center text-white cursor-pointer" onClick={toggleSidebar}>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>graphic_eq</span>
+              </div>
+              {!isSidebarCollapsed && (
+                  <div className="overflow-hidden">
+                    <h1 className="text-xl font-black tracking-tighter text-[#191C1D] dark:text-white truncate">Editorial</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold truncate">Productivity Suite</p>
+                  </div>
+              )}
           </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tighter text-[#191C1D] dark:text-white">Editorial</h1>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Productivity Suite</p>
-          </div>
+          {!isSidebarCollapsed && (
+             <button onClick={toggleSidebar} className="text-slate-400 hover:text-primary transition-colors">
+                <span className="material-symbols-outlined text-sm">keyboard_double_arrow_left</span>
+             </button>
+          )}
         </div>
 
         <nav className="space-y-1">
@@ -56,22 +97,29 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                   isActive
                     ? 'bg-white dark:bg-slate-800 text-primary dark:text-primary-fixed shadow-[0px_12px_32px_rgba(25,28,29,0.04)] font-bold scale-98 active-nav-fill'
                     : 'text-slate-400 dark:text-slate-500 hover:text-on-surface hover:bg-surface-container-low transition-colors'
-                }`}
+                } ${isSidebarCollapsed ? 'justify-center px-0' : ''}`}
+                title={isSidebarCollapsed ? item.label : undefined}
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                {!isSidebarCollapsed && <span className="text-sm font-bold tracking-tight truncate">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
         <div className="mt-auto p-2">
+          {isSidebarCollapsed && (
+             <button onClick={toggleSidebar} className="w-full flex justify-center py-4 mb-2 text-slate-400 hover:text-primary">
+                 <span className="material-symbols-outlined text-sm">keyboard_double_arrow_right</span>
+             </button>
+          )}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="w-full py-4 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-2xl font-black text-sm tracking-tight flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-transform"
+            className={`w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-2xl font-black text-sm tracking-tight flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-transform ${isSidebarCollapsed ? 'px-0' : 'px-4'}`}
+            title={isSidebarCollapsed ? "New Entry" : undefined}
           >
             <span className="material-symbols-outlined text-xl">add</span>
-            New Entry
+            {!isSidebarCollapsed && "New Entry"}
           </button>
         </div>
       </aside>
@@ -84,9 +132,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Canvas */}
-      <main className="flex-1 ml-64 min-h-screen relative p-8">
+      <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         {/* TopNavBar Component */}
-        <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-[#BBCABF]/10 z-40 flex justify-between items-center px-12">
+        <header className={`fixed top-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-[#BBCABF]/10 z-40 flex justify-between items-center px-12 transition-all duration-300 ${isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-16rem)]'}`}>
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-full max-w-lg">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
@@ -99,8 +147,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
-              <button className="text-slate-400 hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
+              <button 
+                  onClick={() => setIsDarkMode(!isDarkMode)} 
+                  className="text-slate-400 hover:text-primary transition-colors flex items-center justify-center p-2"
+                  title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+              >
+                 <span className="material-symbols-outlined text-xl">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+              </button>
+              <button className="text-slate-400 hover:text-primary transition-colors p-2">
+                <span className="material-symbols-outlined text-xl">notifications</span>
               </button>
               <button className="text-slate-400 hover:text-primary transition-colors">
                 <span className="material-symbols-outlined">settings</span>

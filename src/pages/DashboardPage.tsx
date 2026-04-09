@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -16,6 +16,7 @@ export function DashboardPage() {
     recentSessions: []
   });
   const [activeSession, setActiveSession] = useState<any>(null);
+  const isFetched = useRef(false);
   
   const location = useLocation();
   const summaryPayload = location.state?.showSummary;
@@ -30,12 +31,13 @@ export function DashboardPage() {
         console.error("Error parsing saved session", e);
       }
     }
-    if (user) {
+    if (user && !isFetched.current) {
+      isFetched.current = true;
       api.get('/dashboard')
         .then(setStats)
         .catch(console.error)
         .finally(() => setLoading(false));
-    } else {
+    } else if (!user) {
         setLoading(false);
     }
   }, [user]);
