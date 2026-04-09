@@ -1,14 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useAudio } from '../contexts/AudioContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, useLocation } from 'react-router-dom';
+
 
 export function TimerPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Initial State Loading
   const getInitialSession = () => {
     if (location.state?.sessionData) {
       const data = location.state.sessionData;
@@ -17,14 +18,13 @@ export function TimerPage() {
     }
     const saved = localStorage.getItem('focusbeats_active_session');
     if (saved) return JSON.parse(saved);
-    
     return { activity_type: 'coding', focus_level: 'medium', task_name: 'Deep Work', duration_minutes: 25, session_type: 'work', is_infinity: false };
   };
 
-  const [sessionMetadata, setSessionMetadata] = useState<any>(getInitialSession());
+  const { playTrack, currentTrack, isPlaying } = useAudio();
+  const [sessionMetadata] = useState<any>(getInitialSession());
   const [sessionType, setSessionType] = useState<'work' | 'short_break'>('work');
-  
-  // Timer State
+
   const [isRunning, setIsRunning] = useState(() => {
     const saved = localStorage.getItem('focusbeats_timer_is_running');
     return saved === null ? true : saved === 'true';
@@ -34,157 +34,156 @@ export function TimerPage() {
     const saved = localStorage.getItem('focusbeats_target_end_time');
     return saved ? parseInt(saved, 10) : null;
   });
-  
-  // Music State
-  const [nowPlaying, setNowPlaying] = useState<{title: string, artist: string, genre: string} | null>(null);
-  const [isPlayingMusic, setIsPlayingMusic] = useState(isRunning);
 
-  // Initialize or Restore target time correctly
+  const [upcomingTracks, setUpcomingTracks] = useState<any[]>([]);
+  const [loadingTracks, setLoadingTracks] = useState(true);
+  const [stickyNote, setStickyNote] = useState(() => {
+    return localStorage.getItem('focusbeats_timer_note') || "";
+  });
+
+  useEffect(() => {
+    localStorage.setItem('focusbeats_timer_note', stickyNote);
+  }, [stickyNote]);
+
   useEffect(() => {
     if (!targetEndTime) {
-       // Only initialize if we don't have a saved one
-       const initialDurationMs = (sessionMetadata.is_infinity ? 25 * 60 : sessionMetadata.duration_minutes * 60) * 1000;
-       const newTarget = Date.now() + initialDurationMs;
-       setTargetEndTime(newTarget);
-       localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-       setTimeLeft(initialDurationMs / 1000);
+      const initialDurationMs = (sessionMetadata.is_infinity ? 25 * 60 : sessionMetadata.duration_minutes * 60) * 1000;
+      const newTarget = Date.now() + initialDurationMs;
+      setTargetEndTime(newTarget);
+      localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+      setTimeLeft(initialDurationMs / 1000);
     } else {
-        // Restore from saved target
-        if (isRunning) {
-            const remaining = Math.max(0, Math.ceil((targetEndTime - Date.now()) / 1000));
-            setTimeLeft(remaining);
-        } else {
-            const savedTimeLeft = localStorage.getItem('focusbeats_time_left');
-            setTimeLeft(savedTimeLeft ? parseInt(savedTimeLeft, 10) : 0);
-        }
+      if (isRunning) {
+        const remaining = Math.max(0, Math.ceil((targetEndTime - Date.now()) / 1000));
+        setTimeLeft(remaining);
+      } else {
+        const savedTimeLeft = localStorage.getItem('focusbeats_time_left');
+        setTimeLeft(savedTimeLeft ? parseInt(savedTimeLeft, 10) : 0);
+      }
     }
     localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
   }, [sessionMetadata]);
 
-  // Sync isRunning to localStorage
   useEffect(() => {
     localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
-    setIsPlayingMusic(isRunning);
   }, [isRunning]);
 
-  // Handle Smart Music Selection
   useEffect(() => {
-      const { activity_type, focus_level } = sessionMetadata;
-      if (focus_level === 'high') {
-          setNowPlaying({ title: "Binaural Focus Alpha", artist: "NeuroSound", genre: "Brainwave" });
-      } else if (activity_type === 'coding') {
-          setNowPlaying({ title: "Syntax Error", artist: "HackerBeats", genre: "Synthwave" });
-      } else if (activity_type === 'reading') {
-          setNowPlaying({ title: "Rainy Cafe", artist: "Lofi Vibes", genre: "Ambient" });
-      } else {
-          setNowPlaying({ title: "Deep Work Mix", artist: "FocusBeats", genre: "Lofi" });
-      }
+    setLoadingTracks(true);
+    const { activity_type, focus_level } = sessionMetadata;
+    
+    api.get(`/music?activity_type=${activity_type}&focus_level=${focus_level}`)
+      .then(data => {
+        const tracksWithMatch = data.map((t: any) => ({
+          ...t,
+          match: Math.floor(Math.random() * (99 - 80 + 1)) + 80
+        })).sort((a: any, b: any) => b.match - a.match);
+        setUpcomingTracks(tracksWithMatch);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingTracks(false));
   }, [sessionMetadata]);
 
-  // Robust Timestamp-Delta Timer
   useEffect(() => {
     let animationFrame: number;
-
     const tick = () => {
       if (isRunning && targetEndTime) {
         const remainingMs = targetEndTime - Date.now();
-        
         if (remainingMs <= 0) {
-           setTimeLeft(0);
-           handleTimerComplete();
+          setTimeLeft(0);
+          handleTimerComplete();
         } else {
-           setTimeLeft(Math.ceil(remainingMs / 1000));
-           animationFrame = requestAnimationFrame(tick);
+          setTimeLeft(Math.ceil(remainingMs / 1000));
+          animationFrame = requestAnimationFrame(tick);
         }
       }
     };
-
     if (isRunning) {
       animationFrame = requestAnimationFrame(tick);
     }
-
     return () => cancelAnimationFrame(animationFrame);
   }, [isRunning, targetEndTime, sessionType, sessionMetadata]);
 
   const handleTimerComplete = () => {
-      setIsRunning(false);
-      localStorage.removeItem('focusbeats_target_end_time');
-      localStorage.removeItem('focusbeats_time_left');
-      
-      if (sessionMetadata.is_infinity) {
-          if (sessionType === 'work') {
-              setSessionType('short_break');
-              const newTarget = Date.now() + 5 * 60 * 1000;
-              setTargetEndTime(newTarget);
-              localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-              setIsRunning(true);
-          } else {
-              setSessionType('work');
-              const newTarget = Date.now() + 25 * 60 * 1000;
-              setTargetEndTime(newTarget);
-              localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-              setIsRunning(true);
-          }
+    setIsRunning(false);
+    localStorage.removeItem('focusbeats_target_end_time');
+    localStorage.removeItem('focusbeats_time_left');
+
+    if (sessionMetadata.is_infinity) {
+      if (sessionType === 'work') {
+        setSessionType('short_break');
+        const newTarget = Date.now() + 5 * 60 * 1000;
+        setTargetEndTime(newTarget);
+        localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+        setIsRunning(true);
       } else {
-          endSession(true);
+        setSessionType('work');
+        const newTarget = Date.now() + 25 * 60 * 1000;
+        setTargetEndTime(newTarget);
+        localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+        setIsRunning(true);
       }
+    } else {
+      endSession(true);
+    }
   };
 
   const toggleTimer = () => {
-      if (isRunning) {
-          // Pause
-          setIsRunning(false);
-          localStorage.setItem('focusbeats_time_left', timeLeft.toString());
-          localStorage.removeItem('focusbeats_target_end_time');
-      } else {
-          // Resume
-          const newTarget = Date.now() + timeLeft * 1000;
-          setTargetEndTime(newTarget);
-          localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-          localStorage.removeItem('focusbeats_time_left');
-          setIsRunning(true);
-      }
+    if (isRunning) {
+      setIsRunning(false);
+      localStorage.setItem('focusbeats_time_left', timeLeft.toString());
+      localStorage.removeItem('focusbeats_target_end_time');
+    } else {
+      const newTarget = Date.now() + timeLeft * 1000;
+      setTargetEndTime(newTarget);
+      localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+      localStorage.removeItem('focusbeats_time_left');
+      setIsRunning(true);
+    }
   };
 
   const endSession = async (isAutoEnd: boolean = false) => {
-      if (!isAutoEnd) {
-          if (!window.confirm("Are you sure you want to end this session early?")) return;
-      }
-      
-      let actualDuration = sessionMetadata.duration_minutes;
-      if (sessionMetadata.is_infinity) {
-          actualDuration = 25; 
-      } else if (!isAutoEnd) {
-          actualDuration = Math.round((sessionMetadata.duration_minutes * 60 - timeLeft) / 60);
-      }
+    if (!isAutoEnd) {
+      if (!window.confirm("Are you sure you want to end this session early?")) return;
+    }
+    let actualDuration = sessionMetadata.duration_minutes;
+    if (sessionMetadata.is_infinity) {
+      actualDuration = 25;
+    } else if (!isAutoEnd) {
+      actualDuration = Math.round((sessionMetadata.duration_minutes * 60 - timeLeft) / 60);
+    }
 
-      localStorage.removeItem('focusbeats_active_session');
-      localStorage.removeItem('focusbeats_target_end_time');
-      localStorage.removeItem('focusbeats_time_left');
-      localStorage.removeItem('focusbeats_timer_is_running');
+    localStorage.removeItem('focusbeats_active_session');
+    localStorage.removeItem('focusbeats_target_end_time');
+    localStorage.removeItem('focusbeats_time_left');
+    localStorage.removeItem('focusbeats_timer_is_running');
 
-      if (user) {
-          try {
-              const result = await api.post('/sessions', { 
-                  duration_minutes: actualDuration, 
-                  session_type: 'work',
-                  activity_type: sessionMetadata.activity_type,
-                  focus_level: sessionMetadata.focus_level,
-                  task_name: sessionMetadata.task_name,
-                  completed: isAutoEnd
-              });
-              navigate('/dashboard', { state: { showSummary: result } });
-              return;
-          } catch (e) {
-              console.error(e);
-          }
+    if (user) {
+      try {
+        const result = await api.post('/sessions', {
+          duration_minutes: actualDuration,
+          session_type: 'work',
+          activity_type: sessionMetadata.activity_type,
+          focus_level: sessionMetadata.focus_level,
+          task_name: sessionMetadata.task_name,
+          completed: isAutoEnd
+        });
+        navigate('/dashboard', { state: { showSummary: result } });
+        return;
+      } catch (e) {
+        console.error(e);
       }
-      
-      navigate('/dashboard', { state: { showSummary: {
+    }
+
+    navigate('/dashboard', {
+      state: {
+        showSummary: {
           duration_minutes: actualDuration,
           focus_score_earned: isAutoEnd ? 10 : 2,
           task_name: sessionMetadata.task_name
-      }}});
+        }
+      }
+    });
   };
 
   const formatTime = (seconds: number) => {
@@ -195,164 +194,193 @@ export function TimerPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  let totalSeconds = sessionMetadata.is_infinity ? (sessionType === 'work' ? 25*60 : 5*60) : sessionMetadata.duration_minutes * 60;
+  let totalSeconds = sessionMetadata.is_infinity ? (sessionType === 'work' ? 25 * 60 : 5 * 60) : sessionMetadata.duration_minutes * 60;
   const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
-      <div className="flex justify-between items-end mb-12">
-        <div>
-            <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-1">
-                {sessionMetadata.is_infinity ? "Infinity Loop" : "Fixed Session"}
-            </p>
-            <h2 className="text-5xl font-black tracking-tighter text-on-surface">Focus Timer</h2>
-        </div>
-        <div className="text-right">
-            <p className="text-xs font-bold text-slate-400 uppercase mb-1">Active Task</p>
-            <p className="text-xl font-black text-primary">{sessionMetadata.task_name}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-col items-center justify-center min-h-[60vh] bg-surface rounded-[48px] p-12 border border-outline relative overflow-hidden transition-colors">
+    <div className="h-[calc(100vh-theme(spacing.20)-112px)] flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden px-8">
+      
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-xl h-full items-center min-h-0">
+        
+        {/* Left: The Watch (col-span-12 on mobile, col-span-8 on desktop) */}
+        <div className="lg:col-span-8 flex flex-col items-center justify-center relative">
+          
+          {/* Internal Watch Container (Squeezed for standard viewports) */}
+          <div className="relative flex items-center justify-center w-full max-w-[min(50vh,360px)] aspect-square mb-4">
             
-            {sessionMetadata.is_infinity && (
-                <div className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-full animate-pulse border border-primary/20">
-                    <span className="material-symbols-outlined text-xl">all_inclusive</span>
-                    <span className="text-xs font-black uppercase tracking-widest">Infinity Mode Active</span>
-                </div>
-            )}
+            {/* Progress Ring with Breathing Effect */}
+            <svg className="w-full h-full transform -rotate-90 filter drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <circle
+                cx="50%"
+                cy="50%"
+                r="45%"
+                stroke="currentColor"
+                strokeWidth="10"
+                fill="transparent"
+                className="text-bg/50"
+              />
+              <circle
+                cx="50%"
+                cy="50%"
+                r="45%"
+                stroke="currentColor"
+                strokeWidth="12"
+                fill="transparent"
+                strokeDasharray="283%"
+                strokeDashoffset={`${283 - (283 * progress) / 100}%`}
+                strokeLinecap="round"
+                className={`${sessionType === 'work' ? `text-primary-500 ${isRunning ? 'animate-pulse-slow' : ''}` : 'text-info'} transition-all duration-1000 ease-linear`}
+              />
+            </svg>
 
-            <div className="relative w-96 h-96 flex items-center justify-center mb-16 group">
-                <svg className="w-full h-full transform -rotate-90 drop-shadow-2xl">
-                    <circle
-                      cx="192"
-                      cy="192"
-                      r="170"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="transparent"
-                      className="text-surface-low"
-                    />
-                    <circle
-                      cx="192"
-                      cy="192"
-                      r="170"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="transparent"
-                      strokeDasharray={1068}
-                      strokeDashoffset={1068 - (1068 * progress) / 100}
-                      strokeLinecap="round"
-                      className={`${sessionType === 'work' ? 'text-primary' : 'text-emerald-500'} transition-all duration-300 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]`}
-                    />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                     <span className="text-8xl font-black tracking-tighter text-on-surface tabular-nums">{formatTime(timeLeft)}</span>
-                     <div className="mt-4 flex flex-col items-center gap-2">
-                         <span className={`text-[10px] uppercase tracking-[0.2em] font-black ${sessionType === 'work' ? 'text-slate-400' : 'text-emerald-500'}`}>
-                             {sessionType === 'work' ? 'Deep Work' : 'Break Time'}
-                         </span>
-                         <div className="flex gap-2 mt-4">
-                             <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] uppercase font-black">{sessionMetadata.activity_type}</span>
-                             <span className="px-3 py-1 bg-surface-container text-slate-500 rounded-full text-[10px] uppercase font-black">{sessionMetadata.focus_level}</span>
-                         </div>
-                     </div>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-12 relative z-10">
-              <button
-                className={`w-28 h-28 rounded-[40px] flex items-center justify-center shadow-2xl transition-all active:scale-90 ${
-                  isRunning 
-                    ? 'bg-surface text-on-surface border border-outline' 
-                    : 'bg-gradient-to-br from-primary to-primary-container text-white shadow-primary/30'
-                }`}
-                onClick={toggleTimer}
-              >
-                <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  {isRunning ? 'pause' : 'play_arrow'}
-                </span>
-              </button>
-
-              <button
-                className="w-20 h-20 rounded-3xl bg-surface-container text-slate-400 hover:text-error hover:bg-error-container/20 active:scale-95 transition-all flex items-center justify-center"
-                onClick={() => endSession(false)}
-              >
-                <span className="material-symbols-outlined text-3xl">stop</span>
-              </button>
-            </div>
-            
-            <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] blur-[120px] rounded-full pointer-events-none transition-colors duration-1000 ${sessionType === 'work' ? 'bg-primary/5' : 'bg-emerald-500/5'}`}></div>
-          </div>
-
-          <div className="space-y-6">
-               <div className="bg-surface-high rounded-[40px] p-8 text-on-surface relative overflow-hidden group border border-outline">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
-                  
-                  <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-10">
-                          <div>
-                              <p className="text-[10px] uppercase font-black tracking-widest text-on-surface-muted">Smart Audio</p>
-                              <h3 className="text-xl font-bold tracking-tight">Now Playing</h3>
-                          </div>
-                          <div className={`w-3 h-3 rounded-full ${isPlayingMusic ? 'bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20' : 'bg-on-surface-muted'}`}></div>
-                      </div>
-
-                      {nowPlaying && (
-                          <div className="flex gap-4 items-center mb-8">
-                             <div className="w-16 h-16 rounded-2xl overflow-hidden bg-primary/20 flex items-center justify-center relative">
-                                 <span className="material-symbols-outlined text-3xl text-primary-fixed">music_note</span>
-                                 {isPlayingMusic && (
-                                    <div className="absolute inset-0 bg-primary/10 animate-ping rounded-2xl"></div>
-                                 )}
-                             </div>
-                             <div>
-                                 <p className="font-black text-lg line-clamp-1">{nowPlaying.title}</p>
-                                 <p className="text-sm font-bold text-slate-400">{nowPlaying.artist}</p>
-                                 <span className="inline-block mt-2 px-2 py-0.5 bg-white/10 rounded-md text-[10px] font-bold text-slate-300 uppercase">{nowPlaying.genre}</span>
-                             </div>
-                          </div>
-                      )}
-
-                      <div className="flex justify-between items-center bg-white/5 p-2 rounded-2xl">
-                          <button className="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors text-slate-300">
-                             <span className="material-symbols-outlined">skip_previous</span>
-                          </button>
-                          <button 
-                             className="w-14 h-14 flex items-center justify-center rounded-xl bg-white text-black hover:scale-105 transition-transform font-black"
-                             onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-                          >
-                             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                {isPlayingMusic ? 'pause' : 'play_arrow'}
-                             </span>
-                          </button>
-                          <button className="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors text-slate-300">
-                             <span className="material-symbols-outlined">skip_next</span>
-                          </button>
-                      </div>
-                  </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-xl">
+              <div className="mb-6">
+                <p className="text-[11px] font-black uppercase tracking-[0.4em] text-text-muted mb-2 opacity-60">
+                  {sessionMetadata.is_infinity ? "Infinity Loop" : "Deep Flow Mode"}
+                </p>
+                <h3 className="text-2xl font-black text-text tracking-tight truncate max-w-[280px] drop-shadow-sm">
+                  {sessionMetadata.task_name}
+                </h3>
               </div>
 
-                  {!sessionMetadata.is_infinity && (
-                 <div className="bg-surface-low rounded-[32px] p-8 border border-outline">
-                     <div className="flex justify-between items-center mb-4">
-                         <span className="text-sm font-bold">Session Progress</span>
-                         <span className="text-xs font-black text-primary">{Math.round(progress)}%</span>
-                     </div>
-                     <div className="h-4 bg-surface-high rounded-full overflow-hidden">
-                         <div 
-                             className="h-full bg-gradient-to-r from-primary to-primary-container rounded-full transition-all duration-1000"
-                             style={{ width: `${progress}%` }}
-                         />
-                     </div>
-                     <p className="text-xs text-on-surface-muted mt-4 font-medium text-center">
-                         Stay focused! You'll be done at {targetEndTime ? new Date(targetEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}.
-                     </p>
-                 </div>
-              )}
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-[72px] font-black text-text tracking-tighter tabular-nums leading-none mb-4 drop-shadow-md">
+                  {formatTime(timeLeft)}
+                </span>
+                
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`flex items-center gap-2 px-4 py-1.5 bg-bg border border-border rounded-full shadow-sm`}>
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${sessionType === 'work' ? 'bg-primary-500 shadow-[0_0_8px_var(--color-primary-500)]' : 'bg-info shadow-[0_0_8px_var(--color-info)]'}`}></span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-text">
+                      {sessionType === 'work' ? 'Concentrating' : 'Recharging'}
+                    </span>
+                  </div>
+                </div>
+                
+                <p className="text-[11px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
+                  <span className="material-symbols-rounded text-sm">schedule</span>
+                  Expected Finish: <span className="text-text">{targetEndTime ? new Date(targetEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* Controls - Tightened z-index and spacing */}
+          <div className="flex items-center gap-8 z-20">
+            <button
+              className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-110 ${isRunning
+                  ? 'bg-surface text-text border border-border shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
+                  : 'bg-primary-500 text-white shadow-2xl shadow-primary-500/40'
+                }`}
+              onClick={toggleTimer}
+            >
+              <span className="material-symbols-rounded text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                {isRunning ? 'pause' : 'play_arrow'}
+              </span>
+            </button>
+
+            <button
+              className="w-14 h-14 rounded-full bg-surface text-error border border-border flex items-center justify-center hover:bg-error hover:text-white transition-all hover:scale-105 active:scale-95 shadow-md group"
+              onClick={() => endSession(false)}
+              title="End Session"
+            >
+              <span className="material-symbols-rounded text-3xl group-hover:rotate-90 transition-transform">stop</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Panel: Sticky Note + Scrollable Queue */}
+        <div className="hidden lg:flex lg:col-span-4 flex-col h-full pt-1 pb-12 gap-6 overflow-hidden">
+          
+          {/* Layer 1: Sticky Note (Fixed at top of panel) */}
+          <div className="flex-shrink-0">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Sticky Note</h4>
+              <span className="material-symbols-rounded text-base text-amber-400">push_pin</span>
+            </div>
+            <div className="bg-amber-100/40 dark:bg-amber-900/20 border border-amber-300/40 dark:border-amber-800/40 p-5 rounded-3xl shadow-sm relative group transition-all hover:shadow-md">
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-40 transition-opacity">
+                <span className="material-symbols-rounded text-base text-amber-900 dark:text-amber-100">edit_note</span>
+              </div>
+              <p className="text-[10px] font-black text-amber-900/80 dark:text-amber-200 uppercase tracking-[0.2em] mb-3">Goal Objective</p>
+              <textarea 
+                className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] font-bold text-amber-950 dark:text-amber-50 resize-none placeholder:text-amber-900/25 dark:placeholder:text-amber-200/20 leading-relaxed no-scrollbar"
+                placeholder="Write your session focus here..."
+                rows={3}
+                value={stickyNote}
+                onChange={(e) => setStickyNote(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Layer 2: Smart Queue (Scrollable) */}
+          <div className="flex-1 flex flex-col min-h-0 relative">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Audio Queue</h4>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-2 -mr-2 no-scrollbar space-y-4 pb-20 relative">
+              {loadingTracks ? (
+                <div className="py-20 flex flex-col items-center justify-center gap-4">
+                  <span className="material-symbols-rounded animate-spin text-primary-500 text-3xl">refresh</span>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Loading Tracks...</p>
+                </div>
+              ) : upcomingTracks.map((track) => (
+                <div 
+                  key={track._id} 
+                  onClick={() => playTrack(track)}
+                  className={`bg-surface border p-4 rounded-2xl shadow-sm transition-all group cursor-pointer hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-4 ${
+                    currentTrack?._id === track._id ? 'border-primary-500 ring-4 ring-primary-500/5' : 'border-border hover:border-primary-400/50'
+                  }`}
+                >
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all shadow-inner overflow-hidden relative ${
+                    currentTrack?._id === track._id && isPlaying ? 'bg-primary-500 text-white' : 'bg-bg text-text-muted group-hover:bg-primary-500 group-hover:text-white'
+                  }`}>
+                    {currentTrack?._id === track._id && isPlaying ? (
+                       <div className="flex items-end gap-[2px] h-4">
+                          <div className="w-1 bg-white animate-[music-bar_0.6s_ease-in-out_infinite] h-2"></div>
+                          <div className="w-1 bg-white animate-[music-bar_0.8s_ease-in-out_infinite] h-4"></div>
+                          <div className="w-1 bg-white animate-[music-bar_0.7s_ease-in-out_infinite] h-3"></div>
+                       </div>
+                    ) : (
+                      <span className="material-symbols-rounded text-3xl">
+                        graphic_eq
+                      </span>
+                    )}
+                    <div className="absolute inset-0 bg-primary-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h5 className="font-black text-text text-[15px] truncate group-hover:text-primary-500 transition-colors">
+                        {track.title}
+                      </h5>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-text-muted truncate uppercase tracking-widest">{track.category}</p>
+                      <div className="w-16 h-1 bg-bg rounded-full overflow-hidden">
+                        <div className="h-full bg-primary-500 rounded-full" style={{ width: `${track.match}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button className="w-full py-5 border-2 border-dashed border-border rounded-2xl text-[11px] font-black text-text-muted hover:border-primary-500/50 hover:text-primary-500 transition-all flex items-center justify-center gap-2 group">
+                <span className="material-symbols-rounded text-lg group-hover:rotate-180 transition-transform">refresh</span>
+                Regenerate Recommendations
+              </button>
+            </div>
+
+            {/* Bottom Blur Mask (Indicates more scroll) */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg via-bg/80 to-transparent pointer-events-none z-10 backdrop-blur-[2px] opacity-90"></div>
+          </div>
+        </div>
       </div>
+
+      <div className={`absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[100%] h-[60%] blur-[160px] rounded-full pointer-events-none transition-all duration-1000 ${
+        isPlaying ? 'opacity-30 scale-110' : 'opacity-10 scale-100'
+      } ${sessionType === 'work' ? 'bg-primary-500 animate-pulse-slow' : 'bg-info'}`}></div>
     </div>
   );
 }

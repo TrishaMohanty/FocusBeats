@@ -16,34 +16,52 @@ export function PlannerPage() {
 
   if (!user) {
     return (
-      <div className="p-8 bg-surface-container rounded-2xl text-center border border-outline-variant/20 shadow-sm mt-8 max-w-2xl mx-auto">
-        <span className="material-symbols-outlined text-6xl text-primary mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock_person</span>
-        <h3 className="text-xl font-bold mb-2">Login Required</h3>
-        <p className="text-slate-500 mb-6">You must be logged in to access the study planner.</p>
-        <button onClick={() => navigate('/login')} className="px-8 py-3 bg-primary text-white rounded-xl font-bold">Sign In</button>
+      <div className="max-w-6xl mx-auto flex items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
+        <div className="bg-surface border border-border p-xl rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center text-center w-full ">
+          <div className="w-16 h-16 bg-warning/10 text-warning rounded-full flex items-center justify-center mb-md">
+            <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>lock_person</span>
+          </div>
+          <h3 className="text-2xl font-bold text-text mb-2">Login Required</h3>
+          <p className="text-text-muted mb-lg">You must be logged in to access the study planner.</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full py-3 bg-bg text-text border border-border hover:bg-surface hover:border-primary-300 font-bold rounded-lg transition-colors shadow-sm"
+          >
+            Sign In
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-black text-on-surface">Study Planner</h2>
-        <button className="px-6 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:bg-primary-dim transition-colors">
-          <span className="material-symbols-outlined">add</span>
+    <div className="max-w-6xl mx-auto space-y-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-between items-end mb-lg border-b border-border pb-md">
+        <div className="flex flex-col gap-xs">
+          <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Schedule</p>
+          <h2 className="text-4xl font-extrabold text-text tracking-tight">Study Planner</h2>
+        </div>
+        <button className="px-md py-sm bg-primary-500 text-white font-bold rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2 shadow-sm shadow-primary-500/20">
+          <span className="material-symbols-rounded text-lg">add</span>
           New Entry
         </button>
       </div>
-      
-      <div className="bg-surface-container-low rounded-3xl p-6 border border-outline-variant/5">
+
+      <div className="bg-surface border border-border p-xl rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] min-h-[400px]">
         {entries.length === 0 ? (
-          <p className="text-slate-500 text-center py-8">No planner entries found. Schedule a session above.</p>
+          <div className="h-full flex flex-col items-center justify-center text-center mt-xl">
+            <div className="w-16 h-16 bg-bg text-text-muted rounded-full flex items-center justify-center border border-dashed border-border mb-md">
+              <span className="material-symbols-rounded text-3xl">event_upcoming</span>
+            </div>
+            <h3 className="text-xl font-bold text-text mb-2">No Planner Entries</h3>
+            <p className="text-text-muted">Schedule a session above to get started.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
-             {/* Entries map would go here */}
+          <div className="flex flex-col gap-md">
+            {/* Entries map would go here */}
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

@@ -20,7 +20,7 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!taskName.trim()) return;
-    
+
     const sessionData = {
       activity_type: activity,
       focus_level: focusLevel,
@@ -29,104 +29,111 @@ export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModa
       is_infinity: duration === 'infinity',
       session_type: 'work'
     };
-    
+
     onStart(sessionData);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-md sm:p-lg">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
-      
+      <div 
+        className="absolute inset-0 bg-bg/80 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      ></div>
+
       {/* Modal */}
-      <div className="relative bg-surface w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden border border-outline animate-in fade-in zoom-in duration-300">
-        <div className="p-10 space-y-8">
-          <div className="text-center">
-             <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-2">New Entry</p>
-             <h3 className="text-4xl font-black tracking-tighter">Start Session</h3>
-             <p className="text-sm text-on-surface-muted mt-2">Configure your daily flow and find your focus.</p>
+      <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] relative z-10 animate-in zoom-in-95 fade-in duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-xl overflow-y-auto custom-scrollbar flex-1">
+          <div className="mb-lg">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary-500 mb-1">New Entry</p>
+            <h3 className="text-3xl font-extrabold text-text tracking-tight">Start Session</h3>
+            <p className="text-text-muted mt-2">Configure your daily flow and find your focus.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Current Activity</label>
-               <select 
-                 value={activity}
-                 onChange={(e) => setActivity(e.target.value)}
-                 className="w-full bg-surface-low border border-outline rounded-2xl py-4 px-6 font-bold text-on-surface focus:ring-1 focus:ring-primary/20 appearance-none outline-none"
-               >
-                 <option value="reading">📖 Reading</option>
-                 <option value="coding">💻 Coding</option>
-                 <option value="revision">📝 Revision</option>
-                 <option value="problem_solving">🧩 Problem Solving</option>
-                 <option value="night_study">🌙 Night Study</option>
-               </select>
+          <form onSubmit={handleSubmit} className="space-y-xl">
+            <div className="space-y-sm">
+              <label className="block text-sm font-bold text-text">Current Activity</label>
+              <div className="relative">
+                <select
+                  value={activity}
+                  onChange={(e) => setActivity(e.target.value)}
+                  className="appearance-none block w-full px-4 py-3 bg-bg border border-border rounded-xl text-text font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-shadow shadow-sm cursor-pointer"
+                >
+                  <option value="reading">📖 Reading</option>
+                  <option value="coding">💻 Coding</option>
+                  <option value="revision">📝 Revision</option>
+                  <option value="problem_solving">🧩 Problem Solving</option>
+                  <option value="night_study">🌙 Night Study</option>
+                </select>
+                <span className="material-symbols-rounded absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">expand_more</span>
+              </div>
             </div>
 
-            <div>
-               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Focus Intensity</label>
-               <div className="grid grid-cols-3 gap-2">
-                  {['low', 'medium', 'high'].map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setFocusLevel(level)}
-                      className={`py-3 rounded-xl font-bold text-sm capitalize transition-all ${
-                        focusLevel === level 
-                          ? 'bg-primary text-white shadow-lg' 
-                          : 'bg-surface-low text-on-surface-muted border border-outline hover:bg-surface-high'
+            <div className="space-y-sm">
+              <label className="block text-sm font-bold text-text">Focus Intensity</label>
+              <div className="grid grid-cols-3 gap-sm">
+                {['low', 'medium', 'high'].map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setFocusLevel(level)}
+                    className={`py-3 rounded-xl font-bold text-sm capitalize transition-all border ${focusLevel === level
+                        ? 'bg-primary-50 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 border-primary-500 shadow-sm'
+                        : 'bg-bg text-text-muted border-border hover:bg-surface hover:border-text-muted/30 hover:text-text'
                       }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-               </div>
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div>
-               <label className="block text-[10px] uppercase font-bold text-on-surface-muted tracking-widest mb-2 px-2">Duration ⏱️</label>
-               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  {[
-                    { label: '25m', value: 25 },
-                    { label: '1h', value: 60 },
-                    { label: '2h', value: 120 },
-                    { label: '3h', value: 180 },
-                    { label: '∞', value: 'infinity' },
-                  ].map((dur) => (
-                    <button
-                      key={dur.label}
-                      type="button"
-                      onClick={() => setDuration(dur.value as any)}
-                      className={`py-3 rounded-xl font-bold text-sm transition-all ${
-                        duration === dur.value 
-                          ? 'bg-primary text-white shadow-lg' 
-                          : 'bg-surface-low text-on-surface-muted border border-outline hover:bg-surface-high'
+            <div className="space-y-sm">
+              <label className="block text-sm font-bold text-text">Duration ⏱️</label>
+              <div className="grid grid-cols-5 gap-xs sm:gap-sm">
+                {[
+                  { label: '25m', value: 25 },
+                  { label: '1h', value: 60 },
+                  { label: '2h', value: 120 },
+                  { label: '3h', value: 180 },
+                  { label: '∞', value: 'infinity' },
+                ].map((dur) => (
+                  <button
+                    key={dur.label}
+                    type="button"
+                    onClick={() => setDuration(dur.value as any)}
+                    className={`py-2 rounded-xl font-bold text-sm transition-all border ${duration === dur.value
+                        ? 'bg-primary-50 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 border-primary-500 shadow-sm'
+                        : 'bg-bg text-text-muted border-border hover:bg-surface hover:border-text-muted/30 hover:text-text'
                       }`}
-                    >
-                      {dur.label}
-                    </button>
-                  ))}
-               </div>
+                  >
+                    {dur.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div>
-               <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 px-2">Primary Task</label>
-               <input 
-                 type="text"
-                 placeholder="What are you working on?"
-                 value={taskName}
-                 onChange={(e) => setTaskName(e.target.value)}
-                 className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 font-bold text-on-surface focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-slate-300"
-               />
+            <div className="space-y-sm">
+              <label className="block text-sm font-bold text-text">Primary Task</label>
+              <input
+                type="text"
+                placeholder="What are you working on?"
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                className="appearance-none block w-full px-4 py-3 bg-bg border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-shadow shadow-sm font-medium"
+              />
             </div>
 
-            <button
-               type="submit"
-               className="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-white rounded-[24px] font-black tracking-tight text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-transform mt-4"
-            >
-              Launch Session
-            </button>
+            <div className="pt-sm">
+              <button
+                type="submit"
+                className="w-full py-4 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-black text-lg tracking-tight shadow-md shadow-primary-500/20 hover:scale-[1.02] active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-rounded">rocket_launch</span>
+                Launch Session
+              </button>
+            </div>
           </form>
         </div>
       </div>

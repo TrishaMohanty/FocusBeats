@@ -22,66 +22,79 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-16 h-16 mx-auto bg-primary-container rounded-2xl flex items-center justify-center text-white mb-4">
-          <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
+    <div className="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm: animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="mx-auto w-16 h-16 bg-primary-50 dark:bg-primary-900/20 text-primary-500 rounded-2xl flex items-center justify-center mb-md border border-primary-200 dark:border-primary-800 shadow-sm">
+          <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
         </div>
-        <h2 className="text-3xl font-black">Create your account</h2>
-        <p className="mt-2 text-sm text-on-surface-muted">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-text tracking-tight">Create your account</h2>
+        <p className="mt-2 text-center text-sm text-text-muted">
           Start your focus journey today
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-surface py-8 px-4 rounded-3xl sm:px-10 border border-outline">
+      <div className="mt-8 sm:mx-auto sm:w-full sm: animate-in fade-in zoom-in-95 duration-700">
+        <div className="bg-surface py-8 px-4 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)] border border-border sm:rounded-2xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-error-container text-on-error-container p-3 rounded-xl text-sm font-bold text-center">
+              <div className="p-sm bg-error/10 border border-error/20 text-error rounded-lg text-sm text-center font-medium">
                 {error}
               </div>
             )}
+
             <div>
-              <label className="block text-sm font-bold mb-2">Display Name</label>
-              <input
-                type="text"
-                required
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none placeholder:text-on-surface-muted/50"
-                placeholder="Alex"
-              />
+              <label className="block text-sm font-bold text-text mb-1">Display Name</label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="appearance-none block w-full px-4 py-3 bg-bg border border-border rounded-xl text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm"
+                  placeholder="Alex"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-bold mb-2">Email address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none placeholder:text-on-surface-muted/50"
-                placeholder="alex@example.com"
-              />
+              <label className="block text-sm font-bold text-text mb-1">Email address</label>
+              <div className="mt-1">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-4 py-3 bg-bg border border-border rounded-xl text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm"
+                  placeholder="alex@example.com"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-bold mb-2">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-surface-low border border-outline rounded-xl py-3 px-4 focus:ring-1 focus:ring-primary/20 outline-none"
-              />
+              <label className="block text-sm font-bold text-text mb-1">Password</label>
+              <div className="mt-1">
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-4 py-3 bg-bg border border-border rounded-xl text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm"
+                />
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95"
-            >
-              Sign Up
-            </button>
+
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md shadow-primary-500/20 text-sm font-bold text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              >
+                Sign Up
+              </button>
+            </div>
           </form>
+
           <div className="mt-6 text-center">
-            <Link to="/login" className="text-sm font-bold text-primary hover:underline">
+            <Link to="/login" className="text-sm font-medium text-text-muted hover:text-primary-500 transition-colors">
               Already have an account? Sign in
             </Link>
           </div>

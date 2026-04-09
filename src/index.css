@@ -1,88 +1,133 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Layout & Containers */
-  --color-background: var(--bg-app);
-  --color-surface: var(--bg-surface);
-  --color-surface-low: var(--bg-surface-low);
-  --color-surface-high: var(--bg-surface-high);
-  
-  /* Text Branding */
-  --color-on-surface: var(--text-main);
-  --color-on-surface-muted: var(--text-muted);
-  
-  /* Borders */
-  --color-outline: var(--border-subtle);
-  --color-outline-focus: var(--border-strong);
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+  --color-primary: var(--primary-500);
 
-  /* Primary Accent (Emerald) */
-  --color-primary: #006c49;
-  --color-primary-container: #10b981;
-  --color-on-primary-container: #ffffff;
-  
-  /* Existing Material Logic */
-  --color-surface-tint: #006c49;
-  --color-secondary: #5e5e5e;
-  --color-error: #ba1a1a;
-  
-  --font-headline: "Inter", sans-serif;
-  --font-body: "Inter", sans-serif;
-  --font-label: "Inter", sans-serif;
+  /* Semantic utilities */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
 
-  --radius-full: 0.75rem;
-  --radius-xl: 0.5rem;
-  --radius-lg: 0.25rem;
+  /* Status colors */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  /* Professional Spacing & Border Constants */
+  /* Professional spacing, radius and elevation system */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-round: 9999px;
+
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+
+  /* Premium Elevation Tokens */
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.2);
+
+  /* Animation Tokens */
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 3s ease-in-out infinite;
 }
 
-:root {
-  /* Light Theme Tokens */
-  --bg-app: #f8f9fa;
-  --bg-surface: #ffffff;
-  --bg-surface-low: #f3f4f5;
-  --bg-surface-high: #e7e8e9;
-  
-  --text-main: #191c1d;
-  --text-muted: #64748b;
-  
-  --border-subtle: rgba(187, 202, 191, 0.2);
-  --border-strong: rgba(187, 202, 191, 0.6);
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
-.dark {
-  /* Premium Ink/Zinc Dark Theme Tokens */
-  --bg-app: #070708; /* Deep Space Black */
-  --bg-surface: #121214; /* Elevated Ink */
-  --bg-surface-low: #0c0c0e; /* Recessed Ink */
-  --bg-surface-high: #1a1a1d; /* High Contrast Ink */
-  
-  --text-main: #f8fafc; /* Pure Silver/White */
-  --text-muted: #94a3b8; /* Slate Blue-Gray */
-  
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.1);
+@keyframes music-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
 }
 
 @layer base {
+  :root {
+    /* LIGHT THEME (Soft creamy/off-white background, not pure white) */
+    --bg: #FAFAF9;      /* Stone 50 */
+    --surface: #FFFFFF; /* Pure white surface to contrast with off-white bg */
+    --text-primary: #171717; /* Neutral 900 */
+    --text-muted: #737373;   /* Neutral 500 */
+    --border: #E5E5E5;       /* Neutral 200 */
+
+    /* MODERN LIGHT GREEN (Primary) */
+    --primary-50: #F0FDF4;
+    --primary-100: #DCFCE7;
+    --primary-200: #BBF7D0;
+    --primary-300: #86EFAC;
+    --primary-400: #4ADE80;
+    --primary-500: #10B981; /* Emerald 500 */
+    --primary-600: #059669;
+    --primary-700: #047857;
+    --primary-800: #065F46;
+    --primary-900: #064E3B;
+
+    /* Semantic Status Colors */
+    --success: #10B981; /* Matches green */
+    --warning: #F59E0B; /* Amber 500, soft and readable */
+    --error: #EF4444;   /* Red 500, standard error */
+    --info: #3B82F6;    /* Blue 500, subtle professional */
+  }
+
+  .dark {
+    /* DARK THEME (Blue-gray / Charcoal, not pure black) */
+    --bg: #0F172A;      /* Slate 900 */
+    --surface: #1E293B; /* Slate 800 */
+    --text-primary: #F8FAFC; /* Slate 50 */
+    --text-muted: #94A3B8;   /* Slate 400 */
+    --border: #334155;       /* Slate 700 */
+  }
+
+  /* Global Body Styles */
   body {
-    @apply bg-background text-on-surface font-body antialiased transition-colors duration-300;
-  }
-}
-
-@layer components {
-  .glass-panel {
-    @apply bg-surface/80 dark:bg-surface/60 backdrop-blur-xl border border-outline shadow-lg;
-  }
-  
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
-  
-  .active-nav-fill .material-symbols-outlined {
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    @apply bg-bg text-text antialiased transition-colors duration-200;
   }
 
-  .premium-glow {
-    @apply relative after:absolute after:inset-0 after:bg-primary/5 after:blur-[100px] after:pointer-events-none after:rounded-full after:-z-10;
+  /* Hide scrollbars but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Premium Micro-Interactions */
+  .btn-press {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+  
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-premium transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply bg-surface/70 backdrop-blur-xl border border-border/50 shadow-glass;
+  }
+
+  .glow-on-hover:hover {
+    box-shadow: var(--shadow-glow);
   }
 }

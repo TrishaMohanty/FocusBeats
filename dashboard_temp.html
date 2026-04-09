@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>FocusBeats | Productivity Suite</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FocusBeats | Productivity Suite</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -77,300 +84,364 @@
             },
         }
     </script>
-<style>
-        body { font-family: 'Inter', sans-serif; }
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(24px);
         }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+
         .active-nav-fill .material-symbols-outlined {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
+
 <body class="bg-background text-on-surface flex min-h-screen">
-<!-- SideNavBar Component -->
-<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#F8F9FA] dark:bg-slate-900 flex flex-col p-4 gap-2 z-50">
-<div class="flex items-center gap-3 mb-8 px-4">
-<div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
-</div>
-<div>
-<h1 class="text-xl font-bold tracking-tighter text-[#191C1D] dark:text-white">Editorial</h1>
-<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Productivity Suite</p>
-</div>
-</div>
-<nav class="space-y-1">
-<!-- Active: Dashboard -->
-<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] font-semibold scale-98 transition-all duration-200" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-<span>Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200" href="#">
-<span class="material-symbols-outlined">timer</span>
-<span>Timer</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200" href="#">
-<span class="material-symbols-outlined">music_note</span>
-<span>Music</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200" href="#">
-<span class="material-symbols-outlined">check_circle</span>
-<span>Tasks</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200" href="#">
-<span class="material-symbols-outlined">analytics</span>
-<span>Analytics</span>
-</a>
-</nav>
-<div class="mt-auto p-4">
-<button class="w-full py-4 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
-<span class="material-symbols-outlined">add</span>
+    <!-- SideNavBar Component -->
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#F8F9FA] dark:bg-slate-900 flex flex-col p-4 gap-2 z-50">
+        <div class="flex items-center gap-3 mb-8 px-4">
+            <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tighter text-[#191C1D] dark:text-white">Editorial</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Productivity Suite</p>
+            </div>
+        </div>
+        <nav class="space-y-1">
+            <!-- Active: Dashboard -->
+            <a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] font-semibold scale-98 transition-all duration-200"
+                href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200"
+                href="#">
+                <span class="material-symbols-outlined">timer</span>
+                <span>Timer</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200"
+                href="#">
+                <span class="material-symbols-outlined">music_note</span>
+                <span>Music</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200"
+                href="#">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Tasks</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#191C1D] hover:bg-white/50 dark:hover:bg-slate-700 transition-all duration-200"
+                href="#">
+                <span class="material-symbols-outlined">analytics</span>
+                <span>Analytics</span>
+            </a>
+        </nav>
+        <div class="mt-auto p-4">
+            <button
+                class="w-full py-4 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">add</span>
                 New Entry
             </button>
-</div>
-</aside>
-<!-- Main Canvas -->
-<main class="flex-1 ml-64 min-h-screen relative">
-<!-- TopNavBar Component -->
-<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-[#BBCABF]/20 z-40 flex justify-between items-center px-8">
-<div class="flex items-center gap-4 flex-1">
-<div class="relative w-full max-w-md">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search workspace..." type="text"/>
-</div>
-</div>
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-4">
-<button class="text-slate-600 dark:text-slate-400 hover:text-emerald-500 transition-colors opacity-80 hover:opacity-100">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-<button class="text-slate-600 dark:text-slate-400 hover:text-emerald-500 transition-colors opacity-80 hover:opacity-100">
-<span class="material-symbols-outlined">settings</span>
-</button>
-</div>
-<div class="h-8 w-[1px] bg-outline-variant/20 mx-2"></div>
-<div class="flex items-center gap-3">
-<div class="text-right">
-<p class="text-xs font-bold text-on-surface">Alex Fischer</p>
-<p class="text-[10px] text-slate-500">Pro Editor</p>
-</div>
-<img alt="User profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container/20" data-alt="Close-up studio portrait of a young man with a confident expression in neutral lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoFcfZLax3YZ4kS03vUWRYEamH-LoA9M58UCzeK0f1RGCHIZgTiopd7HfZldNjCQ7gvB4XINMmFR5Oan00vBDVY3KAVTMxFC1nxMWhSE4Dw4Py2RWZ2rrDijp0UXwUbN6E0SPdauNCDakGWfIDjeHaDalPG1B9YDJu72QoMfGzx9Ag5bYvAOaHFSsVSHU_mNAD2Wyq0KnFuCDeDv3MtXMl51wLtY2z4hzBzdjUQpw866YpbDILYTkj-CqAxOm4cK0h5Fu8WzDk8JM"/>
-</div>
-</div>
-</header>
-<!-- Content Area -->
-<div class="pt-24 pb-12 px-8 max-w-7xl mx-auto space-y-8">
-<!-- Welcome Section -->
-<section class="flex justify-between items-end">
-<div>
-<h2 class="text-4xl font-black tracking-tighter text-on-surface mb-2">Welcome back, Alex</h2>
-<p class="text-slate-500 font-medium">You're 12% more productive than last Thursday. Keep the flow.</p>
-</div>
-<div class="flex gap-2">
-<div class="flex -space-x-2">
-<img alt="team 1" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="portrait of smiling woman in warm natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTDBhJrxYlvS4MXNz8kn7wQBkaMiql8pUKc6NawE6w7HfQVnxacoAe2ar3IA49V2OQs63eKsw_yIdpArzL3lvqCEqB1--iG5AAWwVdNzpUdhxPo4vT1PFdsIXN-JX0CPtQ6fCQ3bdYD0Q8XpDWahdOarVgtZnjVZ2NOUKB2bLJu2LUHN0swQ7l-V2Z0LaxFo-LuRJ0rS7RH07CYsu2qpcUSn4rGz2fqb6tm7rUVb1STnytdOtY803kjW-GfTC3R_ACe9G0aVcMkj8"/>
-<img alt="team 2" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="portrait of a man with stylish glasses in soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1SNxSbJoA68-ORhmMpVdxFRutqMwSIqtl5KGUXDrrOa-jbU38lZTeWB7KJTdkVL3Jdy9FWfBfcolymBT1xBkaUbENVwMjXP5MO9Yq-DSVIKadNscd-YIlBg1ZFJE_uniq9teNgZY5ItqSw9MsR7t2_42ID-e5SS_xnvM9Imd1Yog17OsgplL2gmDIpxP-73Dyy-oY1jRZ73ohsV1UXBBXTCVmMjNuM9Pj6i19PGW75vHHpeKXwWzpjPk2x35rOoAWUR7UnFBCGMU"/>
-<div class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-white flex items-center justify-center text-[10px] font-bold">+3</div>
-</div>
-</div>
-</section>
-<!-- Stats Bento Grid -->
-<section class="grid grid-cols-1 md:grid-cols-4 gap-6">
-<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all group">
-<div class="flex items-start justify-between mb-4">
-<div class="p-2 bg-primary-container/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">bolt</span>
-</div>
-<span class="text-[10px] font-bold text-primary px-2 py-1 bg-primary-container/10 rounded-full">+4.2%</span>
-</div>
-<p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Focus Score</p>
-<p class="text-3xl font-black">82</p>
-</div>
-<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
-<div class="flex items-start justify-between mb-4">
-<div class="p-2 bg-primary-container/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">history</span>
-</div>
-</div>
-<p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Sessions Today</p>
-<p class="text-3xl font-black">6</p>
-</div>
-<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
-<div class="flex items-start justify-between mb-4">
-<div class="p-2 bg-primary-container/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">task_alt</span>
-</div>
-</div>
-<p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Tasks Completed</p>
-<p class="text-3xl font-black">12</p>
-</div>
-<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
-<div class="flex items-start justify-between mb-4">
-<div class="p-2 bg-primary-container/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">local_fire_department</span>
-</div>
-</div>
-<p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Streak Days</p>
-<p class="text-3xl font-black">14</p>
-</div>
-</section>
-<!-- Main Features Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<!-- Left: Quick Actions & Motivation -->
-<div class="lg:col-span-2 space-y-8">
-<section>
-<div class="flex items-center gap-3 mb-6">
-<h3 class="text-xl font-bold tracking-tight">Quick Actions</h3>
-<div class="flex-1 h-[1px] bg-outline-variant/20"></div>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<button class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
-<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">timer</span>
-<div>
-<p class="font-bold">Start Timer</p>
-<p class="text-xs text-slate-500">Begin 25m Pomodoro</p>
-</div>
-</button>
-<button class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
-<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">add_task</span>
-<div>
-<p class="font-bold">Add Task</p>
-<p class="text-xs text-slate-500">Queue a new focus item</p>
-</div>
-</button>
-<button class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
-<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">library_music</span>
-<div>
-<p class="font-bold">Find Music</p>
-<p class="text-xs text-slate-500">Select focus soundscape</p>
-</div>
-</button>
-<button class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
-<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">event_note</span>
-<div>
-<p class="font-bold">Plan Session</p>
-<p class="text-xs text-slate-500">Configure your daily flow</p>
-</div>
-</button>
-</div>
-</section>
-<section class="relative overflow-hidden rounded-3xl bg-primary-container/5 p-8 border border-primary-container/10">
-<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
-<div class="relative z-10">
-<span class="material-symbols-outlined text-primary-container text-4xl mb-4" style="font-variation-settings: 'FILL' 1;">format_quote</span>
-<h4 class="text-2xl font-semibold tracking-tight text-on-surface-variant max-w-lg mb-4">
-                                "The secret of getting ahead is getting started. The secret of getting started is breaking your complex overwhelming tasks into small manageable tasks."
+        </div>
+    </aside>
+    <!-- Main Canvas -->
+    <main class="flex-1 ml-64 min-h-screen relative">
+        <!-- TopNavBar Component -->
+        <header
+            class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-[#BBCABF]/20 z-40 flex justify-between items-center px-8">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative w-full ">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    <input
+                        class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 text-sm focus:ring-2 focus:ring-primary/20"
+                        placeholder="Search workspace..." type="text" />
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="text-slate-600 dark:text-slate-400 hover:text-emerald-500 transition-colors opacity-80 hover:opacity-100">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button
+                        class="text-slate-600 dark:text-slate-400 hover:text-emerald-500 transition-colors opacity-80 hover:opacity-100">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                </div>
+                <div class="h-8 w-[1px] bg-outline-variant/20 mx-2"></div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-on-surface">Alex Fischer</p>
+                        <p class="text-[10px] text-slate-500">Pro Editor</p>
+                    </div>
+                    <img alt="User profile"
+                        class="w-10 h-10 rounded-full object-cover border-2 border-primary-container/20"
+                        data-alt="Close-up studio portrait of a young man with a confident expression in neutral lighting"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoFcfZLax3YZ4kS03vUWRYEamH-LoA9M58UCzeK0f1RGCHIZgTiopd7HfZldNjCQ7gvB4XINMmFR5Oan00vBDVY3KAVTMxFC1nxMWhSE4Dw4Py2RWZ2rrDijp0UXwUbN6E0SPdauNCDakGWfIDjeHaDalPG1B9YDJu72QoMfGzx9Ag5bYvAOaHFSsVSHU_mNAD2Wyq0KnFuCDeDv3MtXMl51wLtY2z4hzBzdjUQpw866YpbDILYTkj-CqAxOm4cK0h5Fu8WzDk8JM" />
+                </div>
+            </div>
+        </header>
+        <!-- Content Area -->
+        <div class="pt-24 pb-12 px-8 max-w-7xl mx-auto space-y-8">
+            <!-- Welcome Section -->
+            <section class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-on-surface mb-2">Welcome back, Alex</h2>
+                    <p class="text-slate-500 font-medium">You're 12% more productive than last Thursday. Keep the flow.
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex -space-x-2">
+                        <img alt="team 1" class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                            data-alt="portrait of smiling woman in warm natural light"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTDBhJrxYlvS4MXNz8kn7wQBkaMiql8pUKc6NawE6w7HfQVnxacoAe2ar3IA49V2OQs63eKsw_yIdpArzL3lvqCEqB1--iG5AAWwVdNzpUdhxPo4vT1PFdsIXN-JX0CPtQ6fCQ3bdYD0Q8XpDWahdOarVgtZnjVZ2NOUKB2bLJu2LUHN0swQ7l-V2Z0LaxFo-LuRJ0rS7RH07CYsu2qpcUSn4rGz2fqb6tm7rUVb1STnytdOtY803kjW-GfTC3R_ACe9G0aVcMkj8" />
+                        <img alt="team 2" class="w-8 h-8 rounded-full border-2 border-white object-cover"
+                            data-alt="portrait of a man with stylish glasses in soft daylight"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1SNxSbJoA68-ORhmMpVdxFRutqMwSIqtl5KGUXDrrOa-jbU38lZTeWB7KJTdkVL3Jdy9FWfBfcolymBT1xBkaUbENVwMjXP5MO9Yq-DSVIKadNscd-YIlBg1ZFJE_uniq9teNgZY5ItqSw9MsR7t2_42ID-e5SS_xnvM9Imd1Yog17OsgplL2gmDIpxP-73Dyy-oY1jRZ73ohsV1UXBBXTCVmMjNuM9Pj6i19PGW75vHHpeKXwWzpjPk2x35rOoAWUR7UnFBCGMU" />
+                        <div
+                            class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-white flex items-center justify-center text-[10px] font-bold">
+                            +3</div>
+                    </div>
+                </div>
+            </section>
+            <!-- Stats Bento Grid -->
+            <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-2 bg-primary-container/10 rounded-lg text-primary">
+                            <span class="material-symbols-outlined">bolt</span>
+                        </div>
+                        <span
+                            class="text-[10px] font-bold text-primary px-2 py-1 bg-primary-container/10 rounded-full">+4.2%</span>
+                    </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Focus Score</p>
+                    <p class="text-3xl font-black">82</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-2 bg-primary-container/10 rounded-lg text-primary">
+                            <span class="material-symbols-outlined">history</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Sessions Today</p>
+                    <p class="text-3xl font-black">6</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-2 bg-primary-container/10 rounded-lg text-primary">
+                            <span class="material-symbols-outlined">task_alt</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Tasks Completed</p>
+                    <p class="text-3xl font-black">12</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_12px_32px_rgba(25,28,29,0.04)] border border-transparent hover:border-primary-container/20 transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-2 bg-primary-container/10 rounded-lg text-primary">
+                            <span class="material-symbols-outlined">local_fire_department</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Streak Days</p>
+                    <p class="text-3xl font-black">14</p>
+                </div>
+            </section>
+            <!-- Main Features Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left: Quick Actions & Motivation -->
+                <div class="lg:col-span-2 space-y-8">
+                    <section>
+                        <div class="flex items-center gap-3 mb-6">
+                            <h3 class="text-xl font-bold tracking-tight">Quick Actions</h3>
+                            <div class="flex-1 h-[1px] bg-outline-variant/20"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button
+                                class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
+                                <span
+                                    class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">timer</span>
+                                <div>
+                                    <p class="font-bold">Start Timer</p>
+                                    <p class="text-xs text-slate-500">Begin 25m Pomodoro</p>
+                                </div>
+                            </button>
+                            <button
+                                class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
+                                <span
+                                    class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">add_task</span>
+                                <div>
+                                    <p class="font-bold">Add Task</p>
+                                    <p class="text-xs text-slate-500">Queue a new focus item</p>
+                                </div>
+                            </button>
+                            <button
+                                class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
+                                <span
+                                    class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">library_music</span>
+                                <div>
+                                    <p class="font-bold">Find Music</p>
+                                    <p class="text-xs text-slate-500">Select focus soundscape</p>
+                                </div>
+                            </button>
+                            <button
+                                class="flex flex-col items-start gap-4 p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 hover:border-primary/40 transition-colors text-left group">
+                                <span
+                                    class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">event_note</span>
+                                <div>
+                                    <p class="font-bold">Plan Session</p>
+                                    <p class="text-xs text-slate-500">Configure your daily flow</p>
+                                </div>
+                            </button>
+                        </div>
+                    </section>
+                    <section
+                        class="relative overflow-hidden rounded-3xl bg-primary-container/5 p-8 border border-primary-container/10">
+                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+                        <div class="relative z-10">
+                            <span class="material-symbols-outlined text-primary-container text-4xl mb-4"
+                                style="font-variation-settings: 'FILL' 1;">format_quote</span>
+                            <h4 class="text-2xl font-semibold tracking-tight text-on-surface-variant max-w-lg mb-4">
+                                "The secret of getting ahead is getting started. The secret of getting started is
+                                breaking your complex overwhelming tasks into small manageable tasks."
                             </h4>
-<div class="flex items-center gap-3">
-<div class="w-10 h-[2px] bg-primary"></div>
-<p class="text-sm font-bold uppercase tracking-widest text-slate-500">Mark Twain</p>
-</div>
-</div>
-</section>
-</div>
-<!-- Right: Recent Activity -->
-<div class="space-y-6">
-<section class="bg-surface-container-low rounded-3xl p-6 h-full border border-outline-variant/5">
-<div class="flex items-center justify-between mb-8">
-<h3 class="text-lg font-bold tracking-tight">Recent Activity</h3>
-<button class="text-xs font-bold text-primary hover:underline">View All</button>
-</div>
-<div class="space-y-1">
-<!-- Activity Item -->
-<div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
-<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
-<span class="material-symbols-outlined">play_arrow</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-bold">Deep Work: UI Design</p>
-<p class="text-[10px] text-slate-500 font-medium">9:30 AM — 45 mins</p>
-</div>
-<div class="text-right">
-<span class="text-xs font-black text-primary">92%</span>
-</div>
-</div>
-<div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
-<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
-<span class="material-symbols-outlined">library_music</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-bold">Lo-fi Chill Mix</p>
-<p class="text-[10px] text-slate-500 font-medium">11:15 AM — 1.5 hrs</p>
-</div>
-<div class="text-right">
-<span class="text-xs font-black text-slate-400">Audio</span>
-</div>
-</div>
-<div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
-<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
-<span class="material-symbols-outlined">check_circle</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-bold">Inbox Cleared</p>
-<p class="text-[10px] text-slate-500 font-medium">1:20 PM — 20 tasks</p>
-</div>
-<div class="text-right">
-<span class="text-xs font-black text-primary">DONE</span>
-</div>
-</div>
-<div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
-<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
-<span class="material-symbols-outlined">timer</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-bold">Study Session: API</p>
-<p class="text-[10px] text-slate-500 font-medium">3:45 PM — 25 mins</p>
-</div>
-<div class="text-right">
-<span class="text-xs font-black text-primary">88%</span>
-</div>
-</div>
-</div>
-<!-- Progress Micro-Card -->
-<div class="mt-8 p-4 bg-white rounded-2xl border border-outline-variant/10">
-<div class="flex justify-between items-center mb-2">
-<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Daily Goal</p>
-<p class="text-xs font-bold text-primary">80%</p>
-</div>
-<div class="w-full h-1.5 bg-primary-fixed rounded-full overflow-hidden">
-<div class="w-[80%] h-full bg-primary rounded-full"></div>
-</div>
-<p class="mt-2 text-[10px] text-slate-500 text-center font-medium">2 more sessions to reach goal</p>
-</div>
-</section>
-</div>
-</div>
-<!-- Asymmetric Grid Section (Project Cards) -->
-<section class="pt-8">
-<div class="flex items-center gap-3 mb-6">
-<h3 class="text-xl font-bold tracking-tight">Active Projects</h3>
-<div class="flex-1 h-[1px] bg-outline-variant/20"></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="md:col-span-2 group relative overflow-hidden rounded-3xl aspect-[21/9]">
-<img alt="Modern workspace" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Minimalist modern office interior with large windows, clean desks, and lush green plants in soft afternoon light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTVZWfNXj3oeF5XJ7JL8jC0nBMa1ZI686L_SBVdkzvgrdDOZyyMa1ackEHOiIn-2WR-CuNKZXpyK47O5bHfXd2uQcWDUS2yBEjb8fBYGtm91H1EmYNRk1uNlDWnOZVGjulmjnDcqNe1t0LJp7_stsMx0O0quxDmHlyms-nRNoKt8uboKBu6I5oxH65ugr96YUVrrernSt8b1EXAm_7odARRIUjh-7mv21mlmvEhRYJHIx6z5F0q52k8LCh4zP8j8kHKYNxsAx5msc"/>
-<div class="absolute inset-0 bg-gradient-to-t from-[#191C1D]/90 via-[#191C1D]/40 to-transparent p-8 flex flex-col justify-end">
-<div class="flex items-center gap-2 mb-2">
-<span class="px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-lg uppercase tracking-tighter">High Priority</span>
-</div>
-<h4 class="text-2xl font-bold text-white mb-2">Workspace Redesign</h4>
-<p class="text-slate-300 text-sm max-w-md">Streamlining the digital asset manager for better focus during creative sprints.</p>
-</div>
-</div>
-<div class="bg-surface-container-highest rounded-3xl p-8 flex flex-col justify-center items-center text-center">
-<div class="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center text-on-surface mb-4">
-<span class="material-symbols-outlined text-3xl">add</span>
-</div>
-<h4 class="font-bold text-lg mb-2">New Project</h4>
-<p class="text-xs text-slate-500 mb-6 px-4">Start a new focused collection for your next big idea.</p>
-<button class="text-xs font-bold text-primary uppercase tracking-widest border-b-2 border-primary pb-1 hover:text-on-primary-container transition-colors">Launch Wizard</button>
-</div>
-</div>
-</section>
-</div>
-</main>
-</body></html>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-[2px] bg-primary"></div>
+                                <p class="text-sm font-bold uppercase tracking-widest text-slate-500">Mark Twain</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- Right: Recent Activity -->
+                <div class="space-y-6">
+                    <section class="bg-surface-container-low rounded-3xl p-6 h-full border border-outline-variant/5">
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-lg font-bold tracking-tight">Recent Activity</h3>
+                            <button class="text-xs font-bold text-primary hover:underline">View All</button>
+                        </div>
+                        <div class="space-y-1">
+                            <!-- Activity Item -->
+                            <div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Deep Work: UI Design</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">9:30 AM — 45 mins</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black text-primary">92%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
+                                    <span class="material-symbols-outlined">library_music</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Lo-fi Chill Mix</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">11:15 AM — 1.5 hrs</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black text-slate-400">Audio</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Inbox Cleared</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">1:20 PM — 20 tasks</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black text-primary">DONE</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 p-4 hover:bg-white rounded-2xl transition-colors group">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm border border-outline-variant/10">
+                                    <span class="material-symbols-outlined">timer</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold">Study Session: API</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">3:45 PM — 25 mins</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black text-primary">88%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Progress Micro-Card -->
+                        <div class="mt-8 p-4 bg-white rounded-2xl border border-outline-variant/10">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Daily Goal</p>
+                                <p class="text-xs font-bold text-primary">80%</p>
+                            </div>
+                            <div class="w-full h-1.5 bg-primary-fixed rounded-full overflow-hidden">
+                                <div class="w-[80%] h-full bg-primary rounded-full"></div>
+                            </div>
+                            <p class="mt-2 text-[10px] text-slate-500 text-center font-medium">2 more sessions to reach
+                                goal</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <!-- Asymmetric Grid Section (Project Cards) -->
+            <section class="pt-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <h3 class="text-xl font-bold tracking-tight">Active Projects</h3>
+                    <div class="flex-1 h-[1px] bg-outline-variant/20"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 group relative overflow-hidden rounded-3xl aspect-[21/9]">
+                        <img alt="Modern workspace"
+                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            data-alt="Minimalist modern office interior with large windows, clean desks, and lush green plants in soft afternoon light"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTVZWfNXj3oeF5XJ7JL8jC0nBMa1ZI686L_SBVdkzvgrdDOZyyMa1ackEHOiIn-2WR-CuNKZXpyK47O5bHfXd2uQcWDUS2yBEjb8fBYGtm91H1EmYNRk1uNlDWnOZVGjulmjnDcqNe1t0LJp7_stsMx0O0quxDmHlyms-nRNoKt8uboKBu6I5oxH65ugr96YUVrrernSt8b1EXAm_7odARRIUjh-7mv21mlmvEhRYJHIx6z5F0q52k8LCh4zP8j8kHKYNxsAx5msc" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-[#191C1D]/90 via-[#191C1D]/40 to-transparent p-8 flex flex-col justify-end">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span
+                                    class="px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-lg uppercase tracking-tighter">High
+                                    Priority</span>
+                            </div>
+                            <h4 class="text-2xl font-bold text-white mb-2">Workspace Redesign</h4>
+                            <p class="text-slate-300 text-sm ">Streamlining the digital asset manager for better focus
+                                during creative sprints.</p>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface-container-highest rounded-3xl p-8 flex flex-col justify-center items-center text-center">
+                        <div
+                            class="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center text-on-surface mb-4">
+                            <span class="material-symbols-outlined text-3xl">add</span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">New Project</h4>
+                        <p class="text-xs text-slate-500 mb-6 px-4">Start a new focused collection for your next big
+                            idea.</p>
+                        <button
+                            class="text-xs font-bold text-primary uppercase tracking-widest border-b-2 border-primary pb-1 hover:text-on-primary-container transition-colors">Launch
+                            Wizard</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,8 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LoginPage } from '../pages/LoginPage';
-import { RegisterPage } from '../pages/RegisterPage';
+import { AuthPage } from '../pages/AuthPage';
 import { MainLayout } from './MainLayout';
 import { DashboardPage } from '../pages/DashboardPage';
 import { MusicPage } from '../pages/MusicPage';
@@ -10,12 +9,13 @@ import { TimerPage } from '../pages/TimerPage';
 import { TasksPage } from '../pages/TasksPage';
 import { PlannerPage } from '../pages/PlannerPage';
 import { AnalyticsPage } from '../pages/AnalyticsPage';
+import { SettingsPage } from '../pages/SettingsPage';
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="animate-spin text-primary">
-        <span className="material-symbols-outlined text-4xl">refresh</span>
+    <div >
+      <div >
+        <span >refresh</span>
       </div>
     </div>
   );
@@ -25,15 +25,15 @@ function LoadingScreen() {
 // The new architecture allows Guest access to the dashboard.
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <LoadingScreen />;
   }
-  
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 }
 
@@ -47,8 +47,8 @@ export function AppContent() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
 
         {/* Guest Accessible Pages */}
         <Route
@@ -63,6 +63,7 @@ export function AppContent() {
                   <Route path="/tasks" element={<TasksPage />} />
                   <Route path="/planner" element={<PlannerPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Suspense>
