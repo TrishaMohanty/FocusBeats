@@ -1,7 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import connectDB from './config/db.js';
+
+// Middleware
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // Import Routes
 import authRoutes from './routes/auth.js';
@@ -12,37 +18,33 @@ import plannerRoutes from './routes/planner.js';
 import dashboardRoutes from './routes/dashboard.js';
 import analyticsRoutes from './routes/analytics.js';
 
+import logger from './utils/logger.js';
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Security & Logging Middleware
+app.use(helmet());
+app.use(morgan('dev'));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+});
+app.use('/api/', limiter);
+
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? ['https://focus-beats.vercel.app'] 
+  : ['https://focus-beats.vercel.app', 'http://localhost:5173'];
+
 app.use(cors({
-  origin: ['https://focus-beats.vercel.app', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
-
-const mongoURI = process.env.MONGODB_URI;
-
-if (!mongoURI) {
-  console.error('❌ CRITICAL: MONGODB_URI is not defined in environment variables');
-}
-
-// 🔌 Attempting MongoDB connection
-mongoose.connect(mongoURI || 'mongodb://127.0.0.1:27017/focusbeats')
-  .then(() => 
-    console.log(
-      `✅ MongoDB connected successfully to: ${mongoURI ? '🌐 External DB' : '💻 Local DB'}`
-    )
-  )
-  .catch((err) => {
-    console.error('🚨 MongoDB connection error details:');
-    console.error('Message:', err.message);
-    console.error('Code:', err.code);
-    console.error('Reason:', err.reason);
-  });
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -58,22 +60,29 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'FocusBeats API is running...',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
 // Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error('API Error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err : {}
-  });
-});
+app.use(notFound);
+app.use(errorHandler);
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start Server Function
+const startServer = async () => {
+  try {
+    // 1. Connect to Database (Wait for it!)
+    await connectDB();
+
+    // 2. Start Listening
+    app.listen(PORT, () => {
+      logger.info(`🚀 Server and Database Ready on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error(`❌ Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;
