@@ -10,12 +10,13 @@ import { TasksPage } from '../pages/TasksPage';
 import { PlannerPage } from '../pages/PlannerPage';
 import { AnalyticsPage } from '../pages/AnalyticsPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { HomePage } from '../pages/HomePage';
 
 function LoadingScreen() {
   return (
-    <div >
-      <div >
-        <span >refresh</span>
+    <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="flex flex-col items-center gap-4">
+        <span className="material-symbols-rounded animate-spin text-primary text-4xl">refresh</span>
       </div>
     </div>
   );
@@ -32,23 +33,24 @@ export function AppContent() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
 
-        {/* Guest Accessible Pages */}
+        {/* Protected App Routes */}
         <Route
           path="/*"
           element={
             <MainLayout>
               <Suspense fallback={<LoadingScreen />}>
                 <Routes>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/music" element={<MusicPage />} />
-                  <Route path="/timer" element={<TimerPage />} />
-                  <Route path="/tasks" element={<TasksPage />} />
-                  <Route path="/planner" element={<PlannerPage />} />
-                  <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="music" element={<MusicPage />} />
+                  <Route path="timer" element={<TimerPage />} />
+                  <Route path="tasks" element={<TasksPage />} />
+                  <Route path="planner" element={<PlannerPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Suspense>

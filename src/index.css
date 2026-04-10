@@ -54,23 +54,42 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 @keyframes music-bar {
-  0%, 100% { height: 4px; }
-  50% { height: 16px; }
+
+  0%,
+  100% {
+    height: 4px;
+  }
+
+  50% {
+    height: 16px;
+  }
 }
 
 @layer base {
   :root {
     /* LIGHT THEME (Soft creamy/off-white background, not pure white) */
-    --bg: #FAFAF9;      /* Stone 50 */
-    --surface: #FFFFFF; /* Pure white surface to contrast with off-white bg */
-    --text-primary: #171717; /* Neutral 900 */
-    --text-muted: #737373;   /* Neutral 500 */
-    --border: #E5E5E5;       /* Neutral 200 */
+    --bg: #FAFAF9;
+    /* Stone 50 */
+    --surface: #FFFFFF;
+    /* Pure white surface to contrast with off-white bg */
+    --text-primary: #171717;
+    /* Neutral 900 */
+    --text-muted: #737373;
+    /* Neutral 500 */
+    --border: #E5E5E5;
+    /* Neutral 200 */
 
     /* MODERN LIGHT GREEN (Primary) */
     --primary-50: #F0FDF4;
@@ -78,26 +97,36 @@
     --primary-200: #BBF7D0;
     --primary-300: #86EFAC;
     --primary-400: #4ADE80;
-    --primary-500: #10B981; /* Emerald 500 */
+    --primary-500: #10B981;
+    /* Emerald 500 */
     --primary-600: #059669;
     --primary-700: #047857;
     --primary-800: #065F46;
     --primary-900: #064E3B;
 
     /* Semantic Status Colors */
-    --success: #10B981; /* Matches green */
-    --warning: #F59E0B; /* Amber 500, soft and readable */
-    --error: #EF4444;   /* Red 500, standard error */
-    --info: #3B82F6;    /* Blue 500, subtle professional */
+    --success: #10B981;
+    /* Matches green */
+    --warning: #F59E0B;
+    /* Amber 500, soft and readable */
+    --error: #EF4444;
+    /* Red 500, standard error */
+    --info: #3B82F6;
+    /* Blue 500, subtle professional */
   }
 
   .dark {
     /* DARK THEME (Blue-gray / Charcoal, not pure black) */
-    --bg: #0F172A;      /* Slate 900 */
-    --surface: #1E293B; /* Slate 800 */
-    --text-primary: #F8FAFC; /* Slate 50 */
-    --text-muted: #94A3B8;   /* Slate 400 */
-    --border: #334155;       /* Slate 700 */
+    --bg: #0F172A;
+    /* Slate 900 */
+    --surface: #1E293B;
+    /* Slate 800 */
+    --text-primary: #F8FAFC;
+    /* Slate 50 */
+    --text-muted: #94A3B8;
+    /* Slate 400 */
+    --border: #334155;
+    /* Slate 700 */
   }
 
   /* Global Body Styles */
@@ -109,6 +138,7 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -118,7 +148,7 @@
   .btn-press {
     @apply active:scale-95 transition-transform duration-150;
   }
-  
+
   .card-hover {
     @apply hover:-translate-y-1 hover:shadow-premium transition-all duration-300;
   }

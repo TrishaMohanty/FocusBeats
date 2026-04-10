@@ -90,7 +90,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       <aside className={`h-screen fixed left-0 top-0 bg-surface flex flex-col p-4 gap-2 border-r border-border transition-all duration-300 group/sidebar
         ${sidebarMode === 'auto-hide' ? 'z-[60] -translate-x-[calc(100%-4px)] hover:translate-x-0 !shadow-2xl' : 'z-50'}
         ${isSidebarCollapsed ? 'w-20' : 'w-72'}`}>
-        
+
         {/* Invisible edge trigger for auto-hide mode */}
         {sidebarMode === 'auto-hide' && (
           <div className="absolute right-0 top-0 w-8 h-full bg-transparent group-hover/sidebar:hidden" />
@@ -124,8 +124,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group/nav ${isActive
-                      ? 'bg-primary-500/10 text-primary-500 font-black shadow-sm'
-                      : 'text-text-muted hover:text-text hover:bg-bg'
+                    ? 'bg-primary-500/10 text-primary-500 font-black shadow-sm'
+                    : 'text-text-muted hover:text-text hover:bg-bg'
                     } ${isSidebarCollapsed ? 'justify-center px-0' : ''}`}
                   title={isSidebarCollapsed ? item.label : undefined}
                 >
@@ -134,7 +134,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                   )}
                   <span className={`material-symbols-rounded text-[22px] transition-transform group-hover/nav:scale-110 ${isActive ? 'scale-110' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
                   {!isSidebarCollapsed && <span className="text-sm font-bold tracking-tight">{item.label}</span>}
-                  
+
                   {isSidebarCollapsed && (
                     <div className="absolute left-full ml-4 px-3 py-1.5 bg-text text-bg text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 pointer-events-none group-hover/nav:opacity-100 transition-opacity z-[70] shadow-xl">
                       {item.label}
@@ -169,11 +169,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       {/* Main Canvas */}
       <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 
         ${sidebarMode === 'auto-hide' ? 'ml-0' : (isSidebarCollapsed ? 'ml-20' : 'ml-72')}`}>
-        
+
         {/* Invisible Overlay for Account Popup to handle outside clicks */}
         {isAccountPopupOpen && (
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsAccountPopupOpen(false)}
           />
         )}
@@ -203,7 +203,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               <button className="w-10 h-10 flex items-center justify-center rounded-lg text-text-muted hover:text-text hover:bg-bg transition-colors">
                 <span className="material-symbols-rounded text-[22px]">notifications</span>
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/settings')}
                 className={`w-10 h-10 flex items-center justify-center rounded-lg hover:bg-bg transition-colors ${location.pathname === '/settings' ? 'text-primary-500 bg-primary-500/5' : 'text-text-muted hover:text-text'}`}
               >
@@ -211,20 +211,19 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             <div className="w-px h-8 bg-border"></div>
-            
+
             <div className="relative flex items-center z-50">
-              <div 
+              <div
                 className="flex items-center group cursor-pointer"
                 onClick={() => setIsAccountPopupOpen(!isAccountPopupOpen)}
               >
                 <div className="flex flex-col items-end mr-3">
                   <p className="text-sm font-bold text-text group-hover:text-primary-500 transition-colors">{user ? user.display_name : 'Guest Account'}</p>
                 </div>
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-lg border-2 transition-colors shadow-sm ${
-                  isAccountPopupOpen 
-                    ? 'border-primary-500 bg-primary-100 text-primary-700' 
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-lg border-2 transition-colors shadow-sm ${isAccountPopupOpen
+                    ? 'border-primary-500 bg-primary-100 text-primary-700'
                     : 'bg-primary-50 text-primary-600 border-primary-200 group-hover:border-primary-400 group-hover:bg-primary-100'
-                }`}>
+                  }`}>
                   {user ? (
                     <div>{user.email[0].toUpperCase()}</div>
                   ) : (
@@ -235,8 +234,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
               {/* Account Dropdown / Popup */}
               {isAccountPopupOpen && (
-                <div 
-                  className="absolute top-14 right-0 w-80 bg-surface border border-border shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] rounded-2xl p-md animate-in fade-in slide-in-from-top-2 duration-200 cursor-default" 
+                <div
+                  className="absolute top-14 right-0 w-80 bg-surface border border-border shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] rounded-2xl p-md animate-in fade-in slide-in-from-top-2 duration-200 cursor-default"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {user ? (
@@ -250,8 +249,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                           <p className="text-xs text-text-muted truncate w-48">{user.email}</p>
                         </div>
                       </div>
-                      <button 
-                        onClick={handleLogout} 
+                      <button
+                        onClick={handleLogout}
                         className="w-full py-2.5 bg-error/10 text-error hover:bg-error/20 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                       >
                         <span className="material-symbols-rounded text-[20px]">logout</span>
@@ -272,15 +271,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Link 
-                          to="/login" 
+                        <Link
+                          to="/login"
                           onClick={() => setIsAccountPopupOpen(false)}
                           className="flex-1 py-2.5 bg-bg border border-border hover:bg-surface rounded-xl font-bold text-sm text-center transition-colors text-text"
                         >
                           Log In
                         </Link>
-                        <Link 
-                          to="/register" 
+                        <Link
+                          to="/register"
                           onClick={() => setIsAccountPopupOpen(false)}
                           className="flex-1 py-2.5 bg-primary-500 text-white hover:bg-primary-600 rounded-xl font-bold text-sm text-center shadow-sm shadow-primary-500/20 transition-colors"
                         >
