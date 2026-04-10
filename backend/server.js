@@ -40,7 +40,12 @@ app.get('/', (req, res) => {
   res.json({ message: 'FocusBeats API is running...' });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export app for Vercel
+export default app;
+
+// Start Server (only if not imported)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
