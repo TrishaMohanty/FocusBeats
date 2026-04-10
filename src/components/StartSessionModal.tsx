@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { api } from '../lib/api';
 
 interface StartSessionModalProps {
   isOpen: boolean;
@@ -9,7 +7,6 @@ interface StartSessionModalProps {
 }
 
 export function StartSessionModal({ isOpen, onClose, onStart }: StartSessionModalProps) {
-  const { user } = useAuth();
   const [activity, setActivity] = useState('coding');
   const [focusLevel, setFocusLevel] = useState('medium');
   const [duration, setDuration] = useState<number | 'infinity'>(25);

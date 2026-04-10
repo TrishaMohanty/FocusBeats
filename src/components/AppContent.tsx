@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthPage } from '../pages/AuthPage';
@@ -21,21 +21,6 @@ function LoadingScreen() {
   );
 }
 
-// ProtectedRoute will redirect to login ONLY if the page specifically requires it.
-// The new architecture allows Guest access to the dashboard.
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-}
 
 export function AppContent() {
   const { loading } = useAuth();

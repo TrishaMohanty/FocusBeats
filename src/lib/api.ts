@@ -8,9 +8,11 @@ const getAuthHeaders = () => {
   };
 };
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://focus-beats-backend.vercel.app';
+
 export const api = {
   async get(endpoint: string) {
-    const res = await fetch(`/api${endpoint}`, {
+    const res = await fetch(`${BASE_URL}/api${endpoint}`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) {
@@ -21,7 +23,7 @@ export const api = {
   },
 
   async post(endpoint: string, data: any) {
-    const res = await fetch(`/api${endpoint}`, {
+    const res = await fetch(`${BASE_URL}/api${endpoint}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -34,7 +36,7 @@ export const api = {
   },
 
   async patch(endpoint: string, data: any) {
-    const res = await fetch(`/api${endpoint}`, {
+    const res = await fetch(`${BASE_URL}/api${endpoint}`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -47,7 +49,7 @@ export const api = {
   },
 
   async delete(endpoint: string) {
-    const res = await fetch(`/api${endpoint}`, {
+    const res = await fetch(`${BASE_URL}/api${endpoint}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
