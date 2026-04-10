@@ -40,9 +40,12 @@ Our **Productivity Station** layout uses a curated 3x3 CSS grid system. No overl
 | **Styling** | Tailwind CSS 4, Modern Glassmorphism |
 | **State** | React Context API |
 | **Database** | MongoDB & Mongoose |
-| **Backend** | Node.js, Express.js |
+| **Backend** | [Node.js, Express.js](./backend/README.md) |
 | **Auth** | JWT (JSON Web Tokens) & Bcrypt |
 | **Charts** | Recharts |
+
+> [!NOTE]
+> For a detailed breakdown of the API and backend architecture, see the [Backend Documentation](./backend/README.md).
 
 ---
 
