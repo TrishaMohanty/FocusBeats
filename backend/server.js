@@ -24,10 +24,25 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/focusbeats')
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+const mongoURI = process.env.MONGODB_URI;
+
+if (!mongoURI) {
+  console.error('❌ CRITICAL: MONGODB_URI is not defined in environment variables');
+}
+
+// 🔌 Attempting MongoDB connection
+mongoose.connect(mongoURI || 'mongodb://127.0.0.1:27017/focusbeats')
+  .then(() => 
+    console.log(
+      `✅ MongoDB connected successfully to: ${mongoURI ? '🌐 External DB' : '💻 Local DB'}`
+    )
+  )
+  .catch((err) => {
+    console.error('🚨 MongoDB connection error details:');
+    console.error('Message:', err.message);
+    console.error('Code:', err.code);
+    console.error('Reason:', err.reason);
+  });
 
 // Routes
 app.use('/api/auth', authRoutes);
