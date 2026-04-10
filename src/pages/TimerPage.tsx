@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAudio } from '../contexts/AudioContext';
+import { AuraVisualizer } from '../components/audio/AuraVisualizer';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ACTIVITY_MAP } from '../lib/constants/activities';
 
 
 export function TimerPage() {
@@ -18,12 +20,93 @@ export function TimerPage() {
     }
     const saved = localStorage.getItem('focusbeats_active_session');
     if (saved) return JSON.parse(saved);
-    return { activity_type: 'coding', focus_level: 'medium', task_name: 'Deep Work', duration_minutes: 25, session_type: 'work', is_infinity: false };
+    return { 
+      activity_type: 'coding', 
+      focus_level: 'medium', 
+      task_name: 'Deep Work', 
+      duration_minutes: 25, 
+      session_type: 'work', 
+      is_infinity: false,
+      mode: 'focused',
+      current_cycle: 1
+    };
   };
 
-  const { playTrack, currentTrack, isPlaying } = useAudio();
-  const [sessionMetadata] = useState<any>(getInitialSession());
-  const [sessionType, setSessionType] = useState<'work' | 'short_break'>('work');
+  const playChime = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
+      oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5);
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+      
+      if (Notification.permission === "granted") {
+        new Notification("Phase Complete", {
+          body: `Time for your ${sessionType === 'work' ? 'break' : 'next focus session'}!`,
+          icon: "/favicon.svg"
+        });
+      }
+    } catch (e) {
+      console.error("Audio/Notification failed", e);
+    }
+  };
+
+  const { playTrack, currentTrack, isPlaying, togglePlay, fadeVolume } = useAudio();
+  const [sessionMetadata, setSessionMetadata] = useState<any>(getInitialSession());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [sessionType, setSessionType] = useState<'work' | 'short_break' | 'long_break'>(() => {
+    const saved = localStorage.getItem('focusbeats_session_type');
+    return (saved as any) || 'work';
+  });
+
+  // Phase-Aware Music: Pause during breaks
+  useEffect(() => {
+    if (sessionType !== 'work' && isPlaying) {
+      togglePlay();
+    }
+  }, [sessionType]);
+
+  const skipPhase = () => {
+    if (window.confirm("Skip this phase?")) {
+      handleTimerComplete();
+      window.dispatchEvent(new Event('timer_state_change'));
+    }
+  };
+
+  const resetPhase = () => {
+    if (window.confirm("Restart this timer?")) {
+      const getDuration = () => {
+        if (sessionType !== 'work') {
+          return sessionType === 'long_break' ? 15 * 60 : 5 * 60;
+        }
+        return (sessionMetadata.mode === 'pomodoro' || sessionMetadata.mode === 'infinity') ? 25 * 60 : sessionMetadata.duration_minutes * 60;
+      };
+      const durationMs = getDuration() * 1000;
+      const newTarget = Date.now() + durationMs;
+      setTargetEndTime(newTarget);
+      localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+      setTimeLeft(durationMs / 1000);
+      setIsRunning(true);
+      window.dispatchEvent(new Event('timer_state_change'));
+    }
+  };
+
+  const extendTime = (minutes: number = 5) => {
+    const additionalMs = minutes * 60 * 1000;
+    const currentTarget = targetEndTime || (Date.now() + timeLeft * 1000);
+    const newTarget = currentTarget + additionalMs;
+    setTargetEndTime(newTarget);
+    localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+    setTimeLeft(prev => prev + minutes * 60);
+    window.dispatchEvent(new Event('timer_state_change'));
+  };
 
   const [isRunning, setIsRunning] = useState(() => {
     const saved = localStorage.getItem('focusbeats_timer_is_running');
@@ -47,7 +130,18 @@ export function TimerPage() {
 
   useEffect(() => {
     if (!targetEndTime) {
-      const initialDurationMs = (sessionMetadata.is_infinity ? 25 * 60 : sessionMetadata.duration_minutes * 60) * 1000;
+      const getDuration = () => {
+        if (sessionType !== 'work') {
+          if (sessionType === 'long_break') return 15 * 60;
+          return 5 * 60;
+        }
+        if (sessionMetadata.mode === 'pomodoro' || sessionMetadata.mode === 'infinity') {
+          return 25 * 60;
+        }
+        return sessionMetadata.duration_minutes * 60;
+      };
+
+      const initialDurationMs = getDuration() * 1000;
       const newTarget = Date.now() + initialDurationMs;
       setTargetEndTime(newTarget);
       localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
@@ -62,7 +156,30 @@ export function TimerPage() {
       }
     }
     localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
-  }, [sessionMetadata]);
+    localStorage.setItem('focusbeats_session_type', sessionType);
+  }, [sessionMetadata, sessionType]);
+
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT') return;
+      
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleTimer();
+      } else if (e.code === 'KeyM') {
+        togglePlay();
+      } else if (e.code === 'Escape') {
+        endSession(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isRunning, timeLeft, targetEndTime]);
 
   useEffect(() => {
     localStorage.setItem('focusbeats_timer_is_running', isRunning.toString());
@@ -104,28 +221,62 @@ export function TimerPage() {
     return () => cancelAnimationFrame(animationFrame);
   }, [isRunning, targetEndTime, sessionType, sessionMetadata]);
 
-  const handleTimerComplete = () => {
+  const handleTimerComplete = async () => {
     setIsRunning(false);
-    localStorage.removeItem('focusbeats_target_end_time');
-    localStorage.removeItem('focusbeats_time_left');
+    playChime();
+    
+    // Save the finished phase to DB
+    await endSession(true, true);
 
-    if (sessionMetadata.is_infinity) {
-      if (sessionType === 'work') {
-        setSessionType('short_break');
-        const newTarget = Date.now() + 5 * 60 * 1000;
-        setTargetEndTime(newTarget);
-        localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-        setIsRunning(true);
+    if (sessionMetadata.mode === 'focused' && !sessionMetadata.is_infinity) {
+      // Standard session ends here
+      return;
+    }
+
+    // Determine next phase
+    let nextType: 'work' | 'short_break' | 'long_break' = 'work';
+    let nextCycle = sessionMetadata.current_cycle || 1;
+
+    if (sessionType === 'work') {
+      // Work finished -> Break
+      if (sessionMetadata.mode === 'pomodoro' && nextCycle % 4 === 0) {
+        nextType = 'long_break';
+        // Trigger Big Celebration
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 5000);
       } else {
-        setSessionType('work');
-        const newTarget = Date.now() + 25 * 60 * 1000;
-        setTargetEndTime(newTarget);
-        localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
-        setIsRunning(true);
+        nextType = 'short_break';
       }
     } else {
-      endSession(true);
+      // Break finished -> Work
+      nextType = 'work';
+      nextCycle += 1;
     }
+
+    // Check if goal reached in Pomodoro mode
+    if (sessionMetadata.mode === 'pomodoro' && nextCycle > (sessionMetadata.total_cycles || 999)) {
+       navigate('/dashboard', { state: { message: "Goal Achieved! You completed your Pomodoro sets." } });
+       return;
+    }
+
+    // Update metadata and restart
+    const updatedMetadata = {
+      ...sessionMetadata,
+      current_cycle: nextCycle
+    };
+    setSessionMetadata(updatedMetadata);
+    setSessionType(nextType);
+    localStorage.setItem('focusbeats_active_session', JSON.stringify(updatedMetadata));
+    localStorage.setItem('focusbeats_session_type', nextType);
+    
+    const nextDuration = nextType === 'work' ? 25 : (nextType === 'long_break' ? 15 : 5);
+    const newTarget = Date.now() + nextDuration * 60 * 1000;
+    setTargetEndTime(newTarget);
+    localStorage.setItem('focusbeats_target_end_time', newTarget.toString());
+    
+    // Auto-start next phase
+    setIsRunning(true);
+    window.dispatchEvent(new Event('timer_state_change'));
   };
 
   const toggleTimer = () => {
@@ -140,50 +291,68 @@ export function TimerPage() {
       localStorage.removeItem('focusbeats_time_left');
       setIsRunning(true);
     }
+    window.dispatchEvent(new Event('timer_state_change'));
   };
 
-  const endSession = async (isAutoEnd: boolean = false) => {
+  const endSession = async (isAutoEnd: boolean = false, keepActive: boolean = false) => {
     if (!isAutoEnd) {
       if (!window.confirm("Are you sure you want to end this session early?")) return;
     }
-    let actualDuration = sessionMetadata.duration_minutes;
-    if (sessionMetadata.is_infinity) {
-      actualDuration = 25;
-    } else if (!isAutoEnd) {
-      actualDuration = Math.round((sessionMetadata.duration_minutes * 60 - timeLeft) / 60);
+
+    let actualDuration = 0;
+    const plannedDuration = sessionType === 'work' 
+      ? (sessionMetadata.mode !== 'focused' ? 25 : sessionMetadata.duration_minutes)
+      : (sessionType === 'long_break' ? 15 : 5);
+
+    if (isAutoEnd) {
+      actualDuration = plannedDuration;
+    } else {
+      actualDuration = Math.round((plannedDuration * 60 - timeLeft) / 60);
     }
 
-    localStorage.removeItem('focusbeats_active_session');
-    localStorage.removeItem('focusbeats_target_end_time');
-    localStorage.removeItem('focusbeats_time_left');
-    localStorage.removeItem('focusbeats_timer_is_running');
+    if (!keepActive) {
+      localStorage.removeItem('focusbeats_active_session');
+      localStorage.removeItem('focusbeats_target_end_time');
+      localStorage.removeItem('focusbeats_time_left');
+      localStorage.removeItem('focusbeats_timer_is_running');
+      localStorage.removeItem('focusbeats_session_type');
+    }
 
-    if (user) {
+    if (user && actualDuration > 0) {
       try {
         const result = await api.post('/sessions', {
           duration_minutes: actualDuration,
-          session_type: 'work',
+          session_type: sessionType,
           activity_type: sessionMetadata.activity_type,
           focus_level: sessionMetadata.focus_level,
           task_name: sessionMetadata.task_name,
+          task_id: sessionMetadata.task_id,
+          notes: stickyNote || null,
           completed: isAutoEnd
         });
-        navigate('/dashboard', { state: { showSummary: result } });
+        
+        if (!keepActive) {
+          navigate('/dashboard', { state: { showSummary: result } });
+        }
         return;
       } catch (e) {
         console.error(e);
       }
     }
 
-    navigate('/dashboard', {
-      state: {
-        showSummary: {
-          duration_minutes: actualDuration,
-          focus_score_earned: isAutoEnd ? 10 : 2,
-          task_name: sessionMetadata.task_name
+    if (!keepActive) {
+      navigate('/dashboard', {
+        state: {
+          showSummary: {
+            duration_minutes: actualDuration,
+            focus_score_earned: isAutoEnd ? 10 : 2,
+            task_name: sessionMetadata.task_name
+          }
         }
-      }
-    });
+      });
+      // Implementation of Phase-Aware Volume Ramping
+      fadeVolume(0, 2000); // Fade out over 2 seconds
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -194,7 +363,9 @@ export function TimerPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  let totalSeconds = sessionMetadata.is_infinity ? (sessionType === 'work' ? 25 * 60 : 5 * 60) : sessionMetadata.duration_minutes * 60;
+  let totalSeconds = sessionType === 'work' 
+    ? (sessionMetadata.mode !== 'focused' ? 25 * 60 : sessionMetadata.duration_minutes * 60)
+    : (sessionType === 'long_break' ? 15 * 60 : 5 * 60);
   const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
   return (
@@ -229,14 +400,16 @@ export function TimerPage() {
                 strokeDasharray="283%"
                 strokeDashoffset={`${283 - (283 * progress) / 100}%`}
                 strokeLinecap="round"
-                className={`${sessionType === 'work' ? `text-primary-500 ${isRunning ? 'animate-pulse-slow' : ''}` : 'text-info'} transition-all duration-1000 ease-linear`}
+                className={`${sessionType === 'work' ? `text-primary-500 ${isRunning ? 'animate-pulse-slow' : ''}` : (sessionType === 'long_break' ? 'text-amber-500' : 'text-info')} transition-all duration-1000 ease-linear`}
               />
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-xl">
               <div className="mb-6">
                 <p className="text-[11px] font-black uppercase tracking-[0.4em] text-text-muted mb-2 opacity-60">
-                  {sessionMetadata.is_infinity ? "Infinity Loop" : "Deep Flow Mode"}
+                  {sessionMetadata.mode === 'pomodoro' ? `Pomodoro Round ${sessionMetadata.current_cycle || 1} of ${sessionMetadata.total_cycles || '?'}` : 
+                   sessionMetadata.mode === 'infinity' ? `Infinity Loop ${sessionMetadata.current_cycle || 1}` : 
+                   "Deep Flow Mode"}
                 </p>
                 <h3 className="text-2xl font-black text-text tracking-tight truncate max-w-[280px] drop-shadow-sm">
                   {sessionMetadata.task_name}
@@ -252,7 +425,7 @@ export function TimerPage() {
                   <div className={`flex items-center gap-2 px-4 py-1.5 bg-bg border border-border rounded-full shadow-sm`}>
                     <span className={`w-2 h-2 rounded-full animate-pulse ${sessionType === 'work' ? 'bg-primary-500 shadow-[0_0_8px_var(--color-primary-500)]' : 'bg-info shadow-[0_0_8px_var(--color-info)]'}`}></span>
                     <span className="text-[11px] font-black uppercase tracking-[0.2em] text-text">
-                      {sessionType === 'work' ? 'Concentrating' : 'Recharging'}
+                      {sessionType === 'work' ? (ACTIVITY_MAP[sessionMetadata.activity_type as keyof typeof ACTIVITY_MAP]?.label || 'Concentrating') : (sessionType === 'long_break' ? 'Deep Rest' : 'Resting')}
                     </span>
                   </div>
                 </div>
@@ -265,14 +438,31 @@ export function TimerPage() {
             </div>
           </div>
 
-          {/* Controls - Tightened z-index and spacing */}
-          <div className="flex items-center gap-8 z-20">
+          {/* Controls - Enhanced with Skip and Extend */}
+          <div className="flex items-center gap-6 z-20">
+            <button
+              className="w-12 h-12 rounded-full bg-surface text-text-muted border border-border flex items-center justify-center hover:bg-bg hover:text-text transition-all hover:scale-105 active:scale-95 shadow-sm"
+              onClick={resetPhase}
+              title="Reset Phase"
+            >
+              <span className="material-symbols-rounded text-xl">restart_alt</span>
+            </button>
+
+            <button
+              className="w-12 h-12 rounded-full bg-surface text-text-muted border border-border flex items-center justify-center hover:bg-bg hover:text-text transition-all hover:scale-105 active:scale-95 shadow-sm"
+              onClick={() => extendTime(5)}
+              title="Add 5 Minutes"
+            >
+              <span className="material-symbols-rounded text-xl">plus_one</span>
+            </button>
+
             <button
               className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-110 ${isRunning
                   ? 'bg-surface text-text border border-border shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
                   : 'bg-primary-500 text-white shadow-2xl shadow-primary-500/40'
                 }`}
               onClick={toggleTimer}
+              title={isRunning ? "Pause (Space)" : "Start (Space)"}
             >
               <span className="material-symbols-rounded text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 {isRunning ? 'pause' : 'play_arrow'}
@@ -280,9 +470,17 @@ export function TimerPage() {
             </button>
 
             <button
+              className="w-12 h-12 rounded-full bg-surface text-text-muted border border-border flex items-center justify-center hover:bg-bg hover:text-text transition-all hover:scale-105 active:scale-95 shadow-sm"
+              onClick={skipPhase}
+              title="Skip Phase"
+            >
+              <span className="material-symbols-rounded text-xl">skip_next</span>
+            </button>
+
+            <button
               className="w-14 h-14 rounded-full bg-surface text-error border border-border flex items-center justify-center hover:bg-error hover:text-white transition-all hover:scale-105 active:scale-95 shadow-md group"
               onClick={() => endSession(false)}
-              title="End Session"
+              title="End session (Esc)"
             >
               <span className="material-symbols-rounded text-3xl group-hover:rotate-90 transition-transform">stop</span>
             </button>
@@ -380,7 +578,48 @@ export function TimerPage() {
 
       <div className={`absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[100%] h-[60%] blur-[160px] rounded-full pointer-events-none transition-all duration-1000 ${
         isPlaying ? 'opacity-30 scale-110' : 'opacity-10 scale-100'
-      } ${sessionType === 'work' ? 'bg-primary-500 animate-pulse-slow' : 'bg-info'}`}></div>
+      } ${sessionType === 'work' ? 'bg-primary-500 animate-pulse-slow' : (sessionType === 'long_break' ? 'bg-amber-500' : 'bg-info')}`}></div>
+
+      <div className="absolute inset-0 pointer-events-none z-0">
+         <AuraVisualizer color={sessionType === 'work' ? '#10b981' : (sessionType === 'long_break' ? '#f59e0b' : '#3b82f6')} />
+      </div>
+
+      {showCelebration && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-primary-500/10 backdrop-blur-[2px] animate-in fade-in duration-1000"></div>
+          <div className="relative animate-in zoom-in spin-in duration-700 flex flex-col items-center">
+             <div className="w-64 h-64 bg-primary-500 rounded-full blur-[100px] absolute opacity-50 scale-150 animate-pulse"></div>
+             <span className="material-symbols-rounded text-[180px] text-primary-500 drop-shadow-[0_0_30px_var(--color-primary-500)] animate-bounce">emoji_events</span>
+             <h2 className="text-5xl font-black text-white mt-8 tracking-tighter drop-shadow-lg">GOAL ACHIEVED!</h2>
+             <p className="text-primary-200 font-bold uppercase tracking-[0.4em] mt-4">Long Break Unlocked</p>
+          </div>
+          {/* Simple CSS Snowflakes as Confetti */}
+          {[...Array(50)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute w-2 h-2 bg-primary-400 rounded-full animate-fall"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `-20px`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .animate-fall {
+          animation-name: fall;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+        }
+      `}</style>
     </div>
   );
 }

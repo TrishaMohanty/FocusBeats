@@ -8,6 +8,13 @@ export const STYLES = {
   SECTION: "relative py-16 px-6 md:py-24 md:px-12",
   CONTAINER: "max-w-7xl mx-auto",
   
+  // Premium Interactivity (Lift, Glow, Scale)
+  INTERACT: "hover:-translate-y-1 hover:shadow-premium hover:shadow-primary-500/20 active:scale-95 transition-all duration-300 cursor-pointer",
+  GLOW: "hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]",
+  
+  // Action Pill
+  ACTION_PILL: "flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border hover:border-primary-500 hover:text-primary-500 transition-all font-bold text-xs uppercase tracking-wider",
+  
   // Navigation
   NAV_LINK: "text-sm font-medium text-text-muted hover:text-primary transition-colors duration-200",
   

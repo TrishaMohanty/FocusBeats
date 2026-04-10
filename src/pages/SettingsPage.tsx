@@ -31,22 +31,22 @@ export function SettingsPage() {
               Interface & Layout
             </h3>
           </div>
-          
+
           <div className="p-8 space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="max-w-md">
+              <div className="">
                 <h4 className="text-md font-bold text-text mb-1">Sidebar Interaction</h4>
                 <p className="text-sm text-text-muted leading-relaxed">Choose how the sidebar behaves. 'Auto-hide' maximizes your focus area by hiding the sidebar until you hover.</p>
               </div>
-              
+
               <div className="flex p-1 bg-bg border border-border rounded-2xl w-fit self-start">
-                <button 
+                <button
                   onClick={() => handleModeChange('fixed')}
                   className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${sidebarMode === 'fixed' ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text'}`}
                 >
                   Fixed
                 </button>
-                <button 
+                <button
                   onClick={() => handleModeChange('auto-hide')}
                   className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${sidebarMode === 'auto-hide' ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text'}`}
                 >
@@ -62,9 +62,9 @@ export function SettingsPage() {
                 <h4 className="text-md font-bold text-text mb-1">Focus Mode Animations</h4>
                 <p className="text-sm text-text-muted leading-relaxed">Enable smooth breathing effects and reactive glows during sessions.</p>
               </div>
-              <button 
+              <button
                 className="w-14 h-8 bg-primary-500 rounded-full relative transition-all shadow-inner"
-                onClick={() => {}}
+                onClick={() => { }}
               >
                 <div className="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md"></div>
               </button>
@@ -80,14 +80,14 @@ export function SettingsPage() {
               Notifications
             </h3>
           </div>
-          
+
           <div className="p-8">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-md font-bold text-text mb-1">Session Completion Toasts</h4>
                 <p className="text-sm text-text-muted leading-relaxed">Show a celebration alert when you finish a focus session.</p>
               </div>
-              <button 
+              <button
                 className={`w-14 h-8 rounded-full relative transition-all shadow-inner ${notifications ? 'bg-primary-500' : 'bg-bg'}`}
                 onClick={() => setNotifications(!notifications)}
               >
@@ -100,11 +100,11 @@ export function SettingsPage() {
         {/* Danger Zone */}
         <section className="bg-error/5 border border-error/20 rounded-[32px] overflow-hidden">
           <div className="p-8">
-             <h3 className="text-lg font-black text-error mb-1">Data Management</h3>
-             <p className="text-sm text-error/60 font-bold mb-6">Permanently delete your local focus profile and clear all history.</p>
-             <button className="px-6 py-3 bg-error text-white font-black rounded-2xl hover:bg-error-600 transition-all text-sm shadow-lg shadow-error/20">
-               Reset Focus History
-             </button>
+            <h3 className="text-lg font-black text-error mb-1">Data Management</h3>
+            <p className="text-sm text-error/60 font-bold mb-6">Permanently delete your local focus profile and clear all history.</p>
+            <button className="px-6 py-3 bg-error text-white font-black rounded-2xl hover:bg-error-600 transition-all text-sm shadow-lg shadow-error/20">
+              Reset Focus History
+            </button>
           </div>
         </section>
       </div>

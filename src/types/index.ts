@@ -17,13 +17,15 @@ export interface StudySession {
   notes: string | null;
 }
 
+import type { ActivityId, FocusLevel } from './session';
+
 export interface MusicTrack {
   id: string;
   user_id: string | null;
   title: string;
-  category: 'lofi' | 'ambient' | 'classical';
-  focus_level: 'low' | 'medium' | 'high';
-  activity_type: 'reading' | 'coding' | 'revision';
+  category: 'lofi' | 'ambient' | 'classical' | string;
+  focus_level: FocusLevel;
+  activity_type: ActivityId;
   embed_url: string;
   created_at: string;
 }

@@ -7,6 +7,7 @@ interface Track {
   focus_level: string;
   activity_type: string;
   embed_url: string;
+  station?: string;
 }
 
 interface AudioContextType {
@@ -17,8 +18,14 @@ interface AudioContextType {
   duration: number;
   togglePlay: () => void;
   playTrack: (track: Track) => void;
+  playNext: () => void;
+  playPrev: () => void;
+  setPlaylist: (tracks: Track[]) => void;
   setVolume: (volume: number) => void;
+  fadeVolume: (target: number, duration: number) => void;
   seekTo: (time: number) => void;
+  playlist: Track[];
+  analyser: AnalyserNode | null;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -31,18 +38,33 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playlist, setPlaylistState] = useState<Track[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Create audio singleton
+    // Audio Singleton
     audioRef.current = new Audio();
-    
     const audio = audioRef.current;
+    
+    // IMPORTANT for Analyser to work with external URLs
+    audio.crossOrigin = "anonymous";
     
     const handleTimeUpdate = () => setProgress(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration);
-    const handleEnded = () => { setIsPlaying(false); setProgress(0); };
+    const handleEnded = () => {
+      if (playlist.length > 0) {
+        playNext();
+      } else {
+        setIsPlaying(false);
+        setProgress(0);
+      }
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -53,9 +75,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.pause();
+      if (audioContextRef.current?.state !== 'closed') {
+        audioContextRef.current?.close();
+      }
     };
   }, []);
 
+  // Update volume on audio element
   useEffect(() => {
     localStorage.setItem('focusbeats_audio_volume', volume.toString());
     if (audioRef.current) {
@@ -63,8 +89,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [volume]);
 
+  // Lazy initialize Audio Context on user interaction (browser policy)
+  const initAudioContext = () => {
+    if (!audioContextRef.current && audioRef.current) {
+      const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+      audioContextRef.current = new Ctx();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      
+      sourceRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(audioContextRef.current.destination);
+    }
+    
+    if (audioContextRef.current?.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+  };
+
   const togglePlay = () => {
     if (!currentTrack) return;
+    
+    initAudioContext();
     
     if (isPlaying) {
       audioRef.current?.pause();
@@ -76,9 +122,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const playTrack = (track: Track) => {
     if (audioRef.current) {
-      // If it's the same track, just toggle
+      initAudioContext();
+      
       if (currentTrack?._id === track._id) {
-        togglePlay();
+        if (!isPlaying) {
+           audioRef.current.play().catch(console.error);
+           setIsPlaying(true);
+        }
         return;
       }
 
@@ -86,7 +136,50 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.play().catch(console.error);
       setCurrentTrack(track);
       setIsPlaying(true);
+      
+      // Update index if in playlist
+      const idx = playlist.findIndex(t => t._id === track._id);
+      if (idx !== -1) setCurrentIndex(idx);
     }
+  };
+
+  const playNext = () => {
+    if (playlist.length === 0) return;
+    const nextIdx = (currentIndex + 1) % playlist.length;
+    setCurrentIndex(nextIdx);
+    playTrack(playlist[nextIdx]);
+  };
+
+  const playPrev = () => {
+    if (playlist.length === 0) return;
+    const prevIdx = (currentIndex - 1 + playlist.length) % playlist.length;
+    setCurrentIndex(prevIdx);
+    playTrack(playlist[prevIdx]);
+  };
+
+  const setPlaylist = (tracks: Track[]) => {
+    setPlaylistState(tracks);
+    setCurrentIndex(-1); // Reset index for new playlist
+  };
+
+  const fadeVolume = (target: number, duration: number) => {
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+    
+    const steps = 30;
+    const stepTime = duration / steps;
+    const volumeStep = (target - volume) / steps;
+    let currentV = volume;
+
+    fadeIntervalRef.current = setInterval(() => {
+      currentV += volumeStep;
+      if ((volumeStep > 0 && currentV >= target) || (volumeStep < 0 && currentV <= target)) {
+        currentV = target;
+        clearInterval(fadeIntervalRef.current!);
+        setVolume(target);
+      } else {
+        setVolume(Math.round(currentV));
+      }
+    }, stepTime);
   };
 
   const seekTo = (time: number) => {
@@ -105,8 +198,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       duration,
       togglePlay,
       playTrack,
+      playNext,
+      playPrev,
+      setPlaylist,
       setVolume,
-      seekTo
+      fadeVolume,
+      seekTo,
+      playlist,
+      analyser: analyserRef.current
     }}>
       {children}
     </AudioContext.Provider>

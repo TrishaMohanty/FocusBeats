@@ -17,7 +17,13 @@ const studySessionSchema = new mongoose.Schema({
   },
   activity_type: {
     type: String,
-    enum: ['reading', 'coding', 'revision', 'night_study'],
+    enum: [
+      'reading', 'coding', 'revision', 'night_study', 'problem_solving', 
+      'writing', 'research', 'design', 'review', 'learning', 
+      'planning', 'creative_work', 'debugging', 'documentation', 
+      'testing', 'refactoring', 'meeting', 'administration', 
+      'maintenance', 'brainstorming', 'analysis', 'social'
+    ],
     default: 'coding'
   },
   focus_level: {
@@ -27,6 +33,10 @@ const studySessionSchema = new mongoose.Schema({
   },
   task_name: {
     type: String,
+  },
+  task_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Task',
   },
   completed_at: {
     type: Date,

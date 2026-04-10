@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudio } from '../contexts/AudioContext';
 import { api } from '../lib/api';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 export function MusicPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { currentTrack, isPlaying, playTrack } = useAudio();
+  const { currentTrack, isPlaying, playTrack, setPlaylist } = useAudio();
   const [tracks, setTracks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,69 +19,118 @@ export function MusicPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const stations = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    tracks.forEach(track => {
+      const s = track.station || 'Focus Beats Collective';
+      if (!groups[s]) groups[s] = [];
+      groups[s].push(track);
+    });
+    return Object.entries(groups).map(([name, tracks]) => ({
+      name,
+      tracks,
+      category: tracks[0].category,
+      focusLevel: tracks[0].focus_level
+    }));
+  }, [tracks]);
+
+  const handlePlayStation = (stationTracks: any[]) => {
+    setPlaylist(stationTracks);
+    playTrack(stationTracks[0]);
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-lg animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-      <div className="flex flex-col gap-xs mb-lg">
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Audio Discovery</p>
-        <h2 className="text-4xl font-extrabold text-text tracking-tight">Focus Sounds</h2>
-        <p className="text-lg text-text-muted">Immersive soundscapes for deep concentration.</p>
+    <div className="max-w-7xl mx-auto space-y-xl animate-in fade-in slide-in-from-bottom-8 duration-700 pb-32">
+      {/* Hero Header */}
+      <div className="relative rounded-[3rem] overflow-hidden bg-surface border border-border p-12 mb-xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10 max-w-2xl">
+           <p className="text-xs font-black uppercase tracking-[0.3em] text-primary-500 mb-4 italic">Audio Intelligence</p>
+           <h2 className="text-6xl font-black text-text tracking-tighter mb-6 italic uppercase">The Studio</h2>
+           <p className="text-xl text-text-muted leading-relaxed font-medium">
+             Your focus is fragile. Protect it with immersive soundscapes engineered for deep concentration and cognitive flow.
+           </p>
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-           <span className="material-symbols-rounded animate-spin text-primary-500 text-4xl">refresh</span>
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+           <span className="material-symbols-rounded animate-spin text-primary-500 text-6xl">refresh</span>
+           <p className="text-xs font-black uppercase tracking-widest text-text-muted">Synchronizing Frequencies...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-          {tracks.map((track) => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2">
+          {stations.map((station, idx) => (
             <div 
-              key={track._id}
-              className={`bg-surface border p-lg rounded-xl shadow-sm transition-all group hover:shadow-lg ${
-                currentTrack?._id === track._id ? 'border-primary-500 ring-4 ring-primary-500/5' : 'border-border hover:border-primary-300'
-              }`}
+              key={idx}
+              className="bg-surface border border-border rounded-[2.5rem] p-8 group hover:border-primary-500/40 transition-all duration-500 relative overflow-hidden"
             >
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-sm transition-all ${
-                currentTrack?._id === track._id && isPlaying ? 'bg-primary-500 text-white animate-pulse' : 'bg-primary-50 dark:bg-primary-900/20 text-primary-500 group-hover:scale-110'
-              }`}>
-                <span className="material-symbols-rounded">
-                  {currentTrack?._id === track._id && isPlaying ? 'volume_up' : 'graphic_eq'}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-text mb-1">{track.title}</h3>
-              <p className="text-text-muted text-sm mb-md uppercase tracking-widest font-black text-[10px]">{track.category} • {track.focus_level} Focus</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               
-              <button 
-                onClick={() => playTrack(track)}
-                className={`w-full py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                  currentTrack?._id === track._id && isPlaying 
-                    ? 'bg-text text-bg shadow-lg' 
-                    : 'bg-bg text-text border border-border hover:border-primary-500 hover:text-primary-500'
-                }`}
-              >
-                <span className="material-symbols-rounded text-lg">
-                  {currentTrack?._id === track._id && isPlaying ? 'pause' : 'play_arrow'}
-                </span> 
-                {currentTrack?._id === track._id && isPlaying ? 'Playing Now' : 'Play Track'}
-              </button>
+              <div className="flex justify-between items-start mb-8 relative z-10">
+                <div className="w-16 h-16 bg-primary-500/10 text-primary-500 rounded-2xl flex items-center justify-center border border-primary-500/20 shadow-sm relative group-hover:scale-110 transition-transform duration-500">
+                  <span className="material-symbols-rounded text-3xl">
+                    {station.category === 'lofi' ? 'coffee' : station.category === 'ambient' ? 'wb_cloudy' : station.category === 'cyberpunk' ? 'terminal' : 'graphic_eq'}
+                  </span>
+                </div>
+                <div className="flex flex-col items-end">
+                   <span className="px-4 py-1.5 bg-bg border border-border rounded-full text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">
+                      {station.tracks.length} Channels
+                   </span>
+                   <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                     station.focusLevel === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-primary-500/10 text-primary-500 border-primary-500/20'
+                   }`}>
+                      {station.focusLevel} Focus
+                   </span>
+                </div>
+              </div>
+
+              <div className="relative z-10 mb-8">
+                <h3 className="text-3xl font-black text-text tracking-tighter mb-2 italic uppercase group-hover:text-primary-500 transition-colors">{station.name}</h3>
+                <p className="text-text-muted font-medium leading-relaxed">
+                   {station.category === 'lofi' ? "Warm textures and rhythmic beats for creative flow." : 
+                    station.category === 'ambient' ? "Stateless atmospheric frequencies to wash away distractions." :
+                    "Hard-coded soundscapes for absolute terminal focus."}
+                </p>
+              </div>
+
+              <div className="relative z-10 flex gap-4">
+                <button 
+                  onClick={() => handlePlayStation(station.tracks)}
+                  className="px-8 py-4 bg-text text-bg rounded-2xl font-black text-sm uppercase italic tracking-tighter hover:scale-105 active:scale-95 transition-all shadow-xl shadow-bg/20 flex items-center gap-2"
+                >
+                  <span className="material-symbols-rounded text-lg">radio</span>
+                  Launch Station
+                </button>
+                <div className="flex-1 flex items-center gap-1.5 px-4 overflow-hidden">
+                   {station.tracks.slice(0, 3).map((t: any, i: number) => (
+                      <div key={i} className={`w-1.5 h-1.5 rounded-full ${currentTrack?._id === t._id && isPlaying ? 'bg-primary-500 animate-pulse' : 'bg-border'}`} />
+                   ))}
+                </div>
+              </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Auth Gate */}
       {!user && (
-        <div className="mt-lg p-xl bg-surface border-2 border-dashed border-border rounded-3xl flex flex-col md:flex-row items-center gap-md text-center md:text-left">
-          <div className="p-4 bg-primary-500/10 text-primary-500 rounded-2xl">
-             <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+        <div className="mt-xl p-12 bg-surface border border-border rounded-[3rem] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden ring-1 ring-white/5">
+          <div className="absolute inset-0 bg-primary-500/5 blur-3xl rounded-full"></div>
+          <div className="p-6 bg-primary-500/10 text-primary-500 rounded-3xl relative z-10">
+             <span className="material-symbols-rounded text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
           </div>
-          <div>
-            <h3 className="text-xl font-black text-text mb-1">Unlock Personalized Focus</h3>
-            <p className="text-text-muted text-sm font-medium">Create an account to save your favorite tracks and get AI recommendations tailored to your activity.</p>
+          <div className="relative z-10 text-center md:text-left">
+            <h3 className="text-3xl font-black text-text mb-2 tracking-tight italic uppercase">Private Studio Access</h3>
+            <p className="text-text-muted font-medium max-w-xl">
+               Draft your own focus missions and save personalized audio stations by creating a global identity.
+            </p>
           </div>
           <button 
             onClick={() => navigate('/login')}
-            className="md:ml-auto px-8 py-3 bg-text text-bg font-bold rounded-2xl hover:scale-105 transition-all text-sm"
+            className="md:ml-auto px-10 py-4 bg-primary-500 text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-tighter shadow-xl shadow-primary-500/20 relative z-10"
           >
-            Sign Up Free
+            Authenticate Now
           </button>
         </div>
       )}

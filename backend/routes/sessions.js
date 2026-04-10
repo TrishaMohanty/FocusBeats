@@ -22,7 +22,7 @@ router.get('/', protect, async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
-    const { duration_minutes, session_type, notes, activity_type, focus_level, task_name, completed } = req.body;
+    const { duration_minutes, session_type, notes, activity_type, focus_level, task_name, task_id, completed } = req.body;
 
     if (duration_minutes === undefined || !session_type) {
       return res.status(400).json({ message: 'Duration and session type are required' });
@@ -35,7 +35,9 @@ router.post('/', protect, async (req, res) => {
       activity_type: activity_type || 'coding',
       focus_level: focus_level || 'medium',
       task_name,
+      task_id: task_id || null,
       notes: notes || null,
+      completed: completed || false,
       completed_at: new Date(),
     });
 

@@ -74,9 +74,12 @@ export function AnalyticsPage() {
             <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-500 flex items-center justify-center">
               <span className="material-symbols-rounded" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
             </div>
-            <span className="text-xs font-bold px-2 py-1 bg-success/10 text-success rounded-md">+12%</span>
+            <div className="flex flex-col items-end">
+               <span className="text-xs font-bold px-2 py-1 bg-success/10 text-success rounded-md">+12%</span>
+               <span className="text-[10px] text-text-muted font-bold mt-1">Total: {data.metrics.grossTimeHrs}h</span>
+            </div>
           </div>
-          <p className="text-text-muted text-sm font-medium">Total Study Time</p>
+          <p className="text-text-muted text-sm font-medium">Net Focus Time</p>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-3xl font-black text-text">{data.metrics.totalTimeHrs}</span>
             <span className="text-text-muted font-bold">hrs</span>
@@ -99,11 +102,11 @@ export function AnalyticsPage() {
         <div className="bg-surface border border-border p-lg rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] hover:border-warning/30 transition-colors">
           <div className="flex justify-between items-start mb-md">
             <div className="w-10 h-10 rounded-lg bg-warning/10 text-warning flex items-center justify-center">
-              <span className="material-symbols-rounded" style={{ fontVariationSettings: "'FILL' 1" }}>pulse</span>
+              <span className="material-symbols-rounded" style={{ fontVariationSettings: "'FILL' 1" }}>timer</span>
             </div>
-            <span className="text-xs font-bold px-2 py-1 bg-success/10 text-success rounded-md">+5%</span>
+            <span className="text-xs font-bold px-2 py-1 bg-amber-500/10 text-amber-500 rounded-md">Rest: {data.metrics.breakMinutes}m</span>
           </div>
-          <p className="text-text-muted text-sm font-medium">Avg Session</p>
+          <p className="text-text-muted text-sm font-medium">Avg Focus Session</p>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-3xl font-black text-text">{data.metrics.avgSessionMin}</span>
             <span className="text-text-muted font-bold">min</span>
@@ -230,11 +233,12 @@ export function AnalyticsPage() {
              </span>
           </div>
           <h3 className="text-2xl lg:text-3xl font-black text-text mb-3 tracking-tight">
-            {data?.metrics?.totalSessions > 5 ? "You're a Morning Maven 🌅" : "Consistency is Key 🗝️"}
+            {data?.metrics?.totalSessions > 10 ? "You're a Focus Legend 🏆" : data?.metrics?.totalSessions > 3 ? "A Morning Maven 🌅" : "Getting Started 🗝️"}
           </h3>
           <p className="text-text-muted leading-relaxed max-w-2xl text-md font-bold">
-            Based on your last <span className="text-text font-black">{data?.metrics?.totalSessions} sessions</span>, your focus peaks when you work for <span className="text-text font-black px-1.5 py-0.5 bg-bg border border-border/60 rounded-md">{data?.metrics?.avgSessionMin} mins</span> at a time. 
-            Keep this rhythm to boost your weekly productivity by <span className="text-primary-500 font-black">12.5%</span>.
+            Based on your last <span className="text-text font-black">{data?.metrics?.totalSessions} sessions</span>, your productivity peaks with <span className="text-text font-black px-1.5 py-0.5 bg-bg border border-border/60 rounded-md">{data?.metrics?.avgSessionMin} min</span> work blocks. 
+            You've banked <span className="text-text font-black">{data?.metrics?.breakMinutes} mins of rest</span>. 
+            {data?.metrics?.breakMinutes < 15 ? " Tip: Your break time is low. Try adding a 5m walk between blocks." : " Your work-life rhythm looks steady!"}
           </p>
           <div className="flex items-center gap-4 mt-8 justify-center md:justify-start">
             <button className="px-8 py-3 bg-text text-bg font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary-500/10 text-sm tracking-tight">

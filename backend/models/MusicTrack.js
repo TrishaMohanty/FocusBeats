@@ -12,8 +12,12 @@ const musicTrackSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['lofi', 'ambient', 'classical'],
+    enum: ['lofi', 'ambient', 'classical', 'electronic', 'nature', 'cyberpunk', 'piano'],
     required: true,
+  },
+  station: {
+    type: String,
+    default: 'Aura Collective',
   },
   focus_level: {
     type: String,
@@ -22,7 +26,6 @@ const musicTrackSchema = new mongoose.Schema({
   },
   activity_type: {
     type: String,
-    enum: ['reading', 'coding', 'revision'],
     required: true,
   },
   embed_url: {

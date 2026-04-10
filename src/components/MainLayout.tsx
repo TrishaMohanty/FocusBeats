@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { StartSessionModal } from './StartSessionModal';
-
 import { MusicPlayer } from './MusicPlayer';
+import { useSession } from '../contexts/SessionContext';
+import { StartSessionModal } from './StartSessionModal';
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
@@ -14,12 +14,70 @@ const navigationItems = [
 ];
 
 
+function MiniTimer() {
+  const { timerState } = useSession();
+  const [displayTime, setDisplayTime] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (timerState.isRunning && timerState.targetEndTime) {
+      const tick = () => {
+        const remaining = Math.max(0, Math.ceil((timerState.targetEndTime! - Date.now()) / 1000));
+        setDisplayTime(remaining);
+      };
+      tick();
+      interval = setInterval(tick, 1000);
+    } else {
+      setDisplayTime(timerState.timeLeft);
+    }
+    return () => clearInterval(interval);
+  }, [timerState]);
+
+  if (!timerState.targetEndTime && timerState.timeLeft === 0) return null;
+
+  const mins = Math.floor(displayTime / 60);
+  const secs = displayTime % 60;
+  const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+  
+  const progress = timerState.totalDuration > 0 ? ((timerState.totalDuration - displayTime) / timerState.totalDuration) * 100 : 0;
+
+  return (
+    <Link 
+      to="/timer"
+      className="flex items-center gap-3 px-3 py-1.5 bg-surface border border-border rounded-xl hover:border-primary-500/50 transition-all group animate-in fade-in zoom-in duration-300"
+    >
+      <div className="relative w-5 h-5 flex items-center justify-center">
+         <svg className="w-full h-full -rotate-90 absolute inset-0">
+           <circle cx="50%" cy="50%" r="40%" stroke="currentColor" strokeWidth="2.5" fill="transparent" className="text-bg" />
+           <circle 
+              cx="50%" cy="50%" r="40%" 
+              stroke="currentColor" strokeWidth="2.5" fill="transparent" 
+              strokeDasharray="100" 
+              style={{ strokeDashoffset: Math.max(0, 100 - progress) }} 
+              className={`${timerState.sessionType === 'work' ? 'text-primary-500' : 'text-amber-500'} transition-all duration-1000`} 
+              strokeLinecap="round"
+           />
+         </svg>
+         {timerState.isRunning && (
+            <div className={`w-1 h-1 rounded-full animate-ping ${timerState.sessionType === 'work' ? 'bg-primary-500' : 'bg-amber-500'}`}></div>
+         )}
+      </div>
+      <span className="text-xs font-black tabular-nums tracking-tight">{timeStr}</span>
+      <div className="flex flex-col gap-0.5 pointer-events-none">
+        <span className="text-[8px] font-black uppercase text-text-muted leading-none">
+           {timerState.sessionType === 'work' ? 'Focus' : 'Break'}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountPopupOpen, setIsAccountPopupOpen] = useState(false);
+  const { isStartModalOpen, openSessionModal, closeSessionModal } = useSession();
 
   // Theme state
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -80,15 +138,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const handleStartSession = (sessionData: any) => {
-    navigate('/timer', { state: { sessionData } });
+  const startSession = (sessionData: any) => {
+    localStorage.setItem('focusbeats_active_session', JSON.stringify(sessionData));
+    navigate('/timer');
   };
 
   return (
     <div className="bg-bg min-h-screen text-text font-sans selection:bg-primary-500/30">
       {/* SideNavBar Component */}
       <aside className={`h-screen fixed left-0 top-0 bg-surface flex flex-col p-4 gap-2 border-r border-border transition-all duration-300 group/sidebar
-        ${sidebarMode === 'auto-hide' ? 'z-[60] -translate-x-[calc(100%-4px)] hover:translate-x-0 !shadow-2xl' : 'z-50'}
+        ${sidebarMode === 'auto-hide' ? 'z-[100] -translate-x-[calc(100%-4px)] hover:translate-x-0 !shadow-2xl' : 'z-50'}
         ${isSidebarCollapsed ? 'w-20' : 'w-72'}`}>
 
         {/* Invisible edge trigger for auto-hide mode */}
@@ -144,27 +203,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </div>
-
+          {/* Action-First Sidebar: Removed "New Entry" button as it's now in Header/FAB */}
         </nav>
-
-        <div className="mt-auto">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className={`w-full py-4 bg-primary-500 text-white rounded-xl font-black text-sm tracking-tight flex items-center justify-center gap-2 shadow-[0_4px_12px_var(--color-primary-500)] shadow-primary-500/30 hover:scale-[1.02] active:scale-95 transition-transform ${isSidebarCollapsed ? 'px-0' : 'px-4'}`}
-            title={isSidebarCollapsed ? "New Entry" : undefined}
-          >
-            <span className="material-symbols-rounded text-lg">add</span>
-            {!isSidebarCollapsed && "New Entry"}
-          </button>
-        </div>
       </aside>
-
-      {/* Start Session Modal */}
-      <StartSessionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onStart={handleStartSession}
-      />
 
       {/* Main Canvas */}
       <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 
@@ -179,19 +220,26 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         )}
 
         {/* TopNavBar Component */}
-        <header className={`fixed top-0 right-0 h-20 bg-bg/80 backdrop-blur-xl border-b border-border z-40 flex justify-between items-center px-8 transition-all duration-300 
+        <header className={`fixed top-0 right-0 h-14 bg-bg/80 backdrop-blur-xl border-b border-border z-[90] flex justify-between items-center px-6 transition-all duration-300 
           ${sidebarMode === 'auto-hide' ? 'w-full' : (isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-18rem)]')}`}>
+          
           <div className="flex items-center gap-4">
-            <div className="flex justify-center items-center px-4 py-2 bg-surface border border-border/60 rounded-xl shadow-subtle focus-within:border-primary-500/50 focus-within:shadow-[0_0_15px_rgba(16,185,129,0.1)] transition-all group">
-              <span className="material-symbols-rounded text-text-muted text-[20px] group-focus-within:text-primary-500 transition-colors">search</span>
-              <input
-                className="bg-transparent border-none outline-none text-text placeholder:text-text-muted/60 w-64 ml-2 font-medium text-sm"
-                placeholder="Search focus sessions..."
-                type="text"
-              />
-            </div>
+            {/* Action-First Navigation (Search removed) */}
           </div>
-          <div className="flex items-center gap-6">
+
+          {/* Center/Right: Action-First Global Controls */}
+          <div className="flex items-center gap-3">
+            <MiniTimer />
+            {/* Primary Action Button */}
+            <button 
+              onClick={() => openSessionModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-black text-sm shadow-md shadow-primary-500/20 active:scale-95 transition-all"
+            >
+              <span className="material-symbols-rounded text-[18px]">add</span>
+              <span className="hidden sm:inline">Start Focus</span>
+            </button>
+            
+            <div className="w-[1px] h-6 bg-border/40 mx-2" />
             <div className="flex items-center gap-2 bg-surface p-1 rounded-xl border border-border">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -296,9 +344,28 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Content Area */}
-        <div className="pt-20">
+        <div className="pt-14 pb-20">
           {children}
         </div>
+
+        {/* Floating Action Button (FAB) */}
+        <button 
+          onClick={() => openSessionModal()}
+          className="fixed bottom-24 right-8 z-[95] w-14 h-14 bg-primary-500 text-white rounded-full shadow-2xl shadow-primary-500/40 flex items-center justify-center hover:scale-110 active:scale-90 transition-all group"
+        >
+          <div className="absolute -top-12 right-0 bg-text text-bg px-3 py-1.5 rounded-xl text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl">
+            Start Focus Session
+            <div className="absolute -bottom-1 right-5 w-2 h-2 bg-text rotate-45" />
+          </div>
+          <span className="material-symbols-rounded text-2xl font-bold">rocket_launch</span>
+        </button>
+
+        {/* Global Modal handled in AppContent or MainLayout */}
+        <StartSessionModal 
+          isOpen={isStartModalOpen}
+          onClose={closeSessionModal}
+          onStart={startSession}
+        />
       </main>
 
       <MusicPlayer />

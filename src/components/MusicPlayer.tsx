@@ -1,7 +1,7 @@
 import { useAudio } from '../contexts/AudioContext';
 
 export function MusicPlayer() {
-  const { currentTrack, isPlaying, togglePlay, volume, setVolume, progress, duration, seekTo } = useAudio();
+  const { currentTrack, isPlaying, togglePlay, volume, setVolume, progress, duration, seekTo, playNext, playPrev, playlist } = useAudio();
 
   const formatTime = (time: number) => {
     if (isNaN(time)) return '00:00';
@@ -11,7 +11,7 @@ export function MusicPlayer() {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 h-18 bg-surface/60 backdrop-blur-2xl border-t border-border/40 z-[60] px-8 flex items-center justify-between animate-in slide-in-from-bottom-full duration-700">
+    <footer className="fixed bottom-0 left-0 right-0 h-14 bg-surface/80 backdrop-blur-2xl border-t border-border/40 z-[60] px-6 flex items-center justify-between animate-in slide-in-from-bottom-full duration-700">
       
       {/* Left: Track Info (Compact) */}
       <div className="flex items-center gap-3 w-[25%] lg:w-[30%]">
@@ -39,20 +39,28 @@ export function MusicPlayer() {
       {/* Center: Controls & Progress (Essential) */}
       <div className="flex flex-col items-center gap-1.5 flex-1 max-w-[50%] lg:max-w-[40%]">
         <div className="flex items-center gap-6">
-          <button className="text-text-muted hover:text-text transition-colors btn-press">
-            <span className="material-symbols-rounded text-[18px]">skip_previous</span>
+          <button 
+            onClick={playPrev}
+            disabled={playlist.length === 0}
+            className="text-text-muted hover:text-text transition-colors btn-press disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <span className="material-symbols-rounded text-[16px]">skip_previous</span>
           </button>
           <button 
             onClick={togglePlay}
             disabled={!currentTrack}
-            className={`w-9 h-9 rounded-full bg-text text-bg flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md ${!currentTrack ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-8 h-8 rounded-full bg-text text-bg flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md ${!currentTrack ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <span className="material-symbols-rounded text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span className="material-symbols-rounded text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
               {isPlaying ? 'pause' : 'play_arrow'}
             </span>
           </button>
-          <button className="text-text-muted hover:text-text transition-colors btn-press">
-            <span className="material-symbols-rounded text-[18px]">skip_next</span>
+          <button 
+            onClick={playNext}
+            disabled={playlist.length === 0}
+            className="text-text-muted hover:text-text transition-colors btn-press disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <span className="material-symbols-rounded text-[16px]">skip_next</span>
           </button>
         </div>
         
