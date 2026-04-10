@@ -20,11 +20,14 @@ interface AudioContextType {
   playTrack: (track: Track) => void;
   playNext: () => void;
   playPrev: () => void;
+  playSmart: (activityType: string) => void;
   setPlaylist: (tracks: Track[]) => void;
   setVolume: (volume: number) => void;
   fadeVolume: (target: number, duration: number) => void;
   seekTo: (time: number) => void;
   playlist: Track[];
+  allTracks: Track[];
+  loading: boolean;
   analyser: AnalyserNode | null;
 }
 
@@ -39,13 +42,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playlist, setPlaylistState] = useState<Track[]>([]);
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
+  const [loading, setLoading] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     // Audio Singleton
@@ -69,6 +74,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
+
+    // Initial load of music library
+    const loadLibrary = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/music`);
+        const data = await response.json();
+        setAllTracks(data);
+      } catch (err) {
+        console.error('Failed to preload music library:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadLibrary();
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -157,6 +177,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     playTrack(playlist[prevIdx]);
   };
 
+  const playSmart = (activityType: string) => {
+    if (allTracks.length === 0) return;
+    
+    // Normalize activity type
+    const activity = activityType.toLowerCase();
+    
+    // Find matching tracks based on category or activity_type in DB
+    let filtered = allTracks.filter(t => 
+      t.activity_type?.toLowerCase() === activity || 
+      t.category?.toLowerCase().includes(activity)
+    );
+
+    // Fallback logic if no exact activity match
+    if (filtered.length === 0) {
+      if (['coding', 'debugging', 'testing', 'refactoring'].includes(activity)) {
+        filtered = allTracks.filter(t => t.category === 'cyberpunk' || t.category === 'lofi');
+      } else if (['writing', 'documentation', 'reading'].includes(activity)) {
+        filtered = allTracks.filter(t => t.category === 'ambient');
+      } else {
+        filtered = [allTracks[0]]; // Final fallback
+      }
+    }
+
+    if (filtered.length > 0) {
+      setPlaylist(filtered);
+      playTrack(filtered[0]);
+    }
+  };
+
   const setPlaylist = (tracks: Track[]) => {
     setPlaylistState(tracks);
     setCurrentIndex(-1); // Reset index for new playlist
@@ -200,11 +249,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       playTrack,
       playNext,
       playPrev,
+      playSmart,
       setPlaylist,
       setVolume,
       fadeVolume,
       seekTo,
       playlist,
+      allTracks,
+      loading,
       analyser: analyserRef.current
     }}>
       {children}

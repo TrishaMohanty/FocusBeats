@@ -36,9 +36,12 @@ export function SessionSummaryModal({ isOpen, onClose, summaryData }: SessionSum
         onClick={handleClose}
       ></div>
 
-      {/* Modal */}
-      <div className="bg-surface border border-border w-full
-       rounded-[2.5rem] p-xl flex flex-col items-center text-center shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] relative z-10 animate-in zoom-in-95 fade-in duration-300 ring-1 ring-white/10">
+      {/* Modal / Victory Board */}
+      <div className="glass-card w-full max-w-2xl
+       rounded-[2.5rem] p-xl flex flex-col items-center text-center shadow-[0_32px_96px_-16px_rgba(0,0,0,0.6)] relative z-10 animate-in zoom-in-95 fade-in duration-1000 overflow-hidden">
+        
+        {/* Decorative background glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[120%] bg-gradient-to-b from-primary-500/20 via-primary-500/5 to-transparent pointer-events-none -translate-y-1/2" />
 
         <div className="w-20 h-20 bg-primary-500/10 text-primary-500 rounded-3xl flex items-center justify-center mb-md border border-primary-500/20 shadow-sm shadow-primary-500/10 relative group">
           <div className="absolute inset-0 bg-primary-500 rounded-3xl opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />

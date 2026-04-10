@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { MusicPlayer } from './MusicPlayer';
+import { useAudio } from '../contexts/AudioContext';
 import { useSession } from '../contexts/SessionContext';
 import { StartSessionModal } from './StartSessionModal';
+import { MusicPlayer } from './MusicPlayer';
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
@@ -138,8 +139,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const { playSmart } = useAudio();
+
   const startSession = (sessionData: any) => {
     localStorage.setItem('focusbeats_active_session', JSON.stringify(sessionData));
+    
+    // Smart Audio Trigger: Match music to activity type
+    if (sessionData.activity_type) {
+      playSmart(sessionData.activity_type);
+    }
+    
     navigate('/timer');
   };
 
@@ -208,7 +217,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Canvas */}
-      <main className={`flex-1 min-h-screen relative p-8 transition-all duration-300 
+      <main className={`flex-1 flex flex-col h-screen relative transition-all duration-300 z-20 overflow-hidden
         ${sidebarMode === 'auto-hide' ? 'ml-0' : (isSidebarCollapsed ? 'ml-20' : 'ml-72')}`}>
 
         {/* Invisible Overlay for Account Popup to handle outside clicks */}
@@ -343,8 +352,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="pt-14 pb-20">
+        {/* Content Area - Restored premium padding and breathing room */}
+        <div className="flex-1 overflow-y-auto relative pt-20 pb-28 px-8">
           {children}
         </div>
 
@@ -368,7 +377,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         />
       </main>
 
-      <MusicPlayer />
+      <MusicPlayer 
+        isSidebarCollapsed={isSidebarCollapsed}
+        sidebarMode={sidebarMode}
+      />
     </div>
   );
 }

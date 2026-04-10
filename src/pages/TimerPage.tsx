@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAudio } from '../contexts/AudioContext';
-import { AuraVisualizer } from '../components/audio/AuraVisualizer';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -58,7 +57,7 @@ export function TimerPage() {
     }
   };
 
-  const { playTrack, currentTrack, isPlaying, togglePlay, fadeVolume } = useAudio();
+  const { isPlaying, togglePlay, fadeVolume } = useAudio();
   const [sessionMetadata, setSessionMetadata] = useState<any>(getInitialSession());
   const [showCelebration, setShowCelebration] = useState(false);
   const [sessionType, setSessionType] = useState<'work' | 'short_break' | 'long_break'>(() => {
@@ -118,9 +117,7 @@ export function TimerPage() {
     return saved ? parseInt(saved, 10) : null;
   });
 
-  const [upcomingTracks, setUpcomingTracks] = useState<any[]>([]);
-  const [loadingTracks, setLoadingTracks] = useState(true);
-  const [stickyNote, setStickyNote] = useState(() => {
+  const [stickyNote] = useState(() => {
     return localStorage.getItem('focusbeats_timer_note') || "";
   });
 
@@ -186,19 +183,13 @@ export function TimerPage() {
   }, [isRunning]);
 
   useEffect(() => {
-    setLoadingTracks(true);
     const { activity_type, focus_level } = sessionMetadata;
     
     api.get(`/music?activity_type=${activity_type}&focus_level=${focus_level}`)
-      .then(data => {
-        const tracksWithMatch = data.map((t: any) => ({
-          ...t,
-          match: Math.floor(Math.random() * (99 - 80 + 1)) + 80
-        })).sort((a: any, b: any) => b.match - a.match);
-        setUpcomingTracks(tracksWithMatch);
+      .then(() => {
+        // Track pre-fetching handled by Context
       })
-      .catch(console.error)
-      .finally(() => setLoadingTracks(false));
+      .catch(console.error);
   }, [sessionMetadata]);
 
   useEffect(() => {
@@ -369,15 +360,15 @@ export function TimerPage() {
   const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.20)-112px)] flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden px-8">
+    <div className="h-full flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden pb-4">
       
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-xl h-full items-center min-h-0">
+      <div className="w-full h-full flex flex-col items-center justify-center relative min-h-0">
         
-        {/* Left: The Watch (col-span-12 on mobile, col-span-8 on desktop) */}
-        <div className="lg:col-span-8 flex flex-col items-center justify-center relative">
+        {/* Centered Watch Container */}
+        <div className="flex flex-col items-center justify-center relative w-full h-full max-h-screen">
           
-          {/* Internal Watch Container (Squeezed for standard viewports) */}
-          <div className="relative flex items-center justify-center w-full max-w-[min(50vh,360px)] aspect-square mb-4">
+          {/* Internal Watch Container (Safe-scaled to prevent ANY overflow) */}
+          <div className="relative flex items-center justify-center w-full max-w-[min(60vh,420px)] aspect-square mb-6">
             
             {/* Progress Ring with Breathing Effect */}
             <svg className="w-full h-full transform -rotate-90 filter drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -417,23 +408,23 @@ export function TimerPage() {
               </div>
 
               <div className="flex flex-col items-center justify-center">
-                <span className="text-[72px] font-black text-text tracking-tighter tabular-nums leading-none mb-4 drop-shadow-md">
+                <span className="text-[84px] font-black text-text tracking-tighter tabular-nums leading-none mb-6 drop-shadow-md">
                   {formatTime(timeLeft)}
                 </span>
                 
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex items-center gap-2 px-4 py-1.5 bg-bg border border-border rounded-full shadow-sm`}>
+                <div className="flex flex-col items-center gap-4">
+                  <div className={`flex items-center gap-2 px-6 py-2 bg-bg border border-border rounded-full shadow-sm`}>
                     <span className={`w-2 h-2 rounded-full animate-pulse ${sessionType === 'work' ? 'bg-primary-500 shadow-[0_0_8px_var(--color-primary-500)]' : 'bg-info shadow-[0_0_8px_var(--color-info)]'}`}></span>
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-text">
+                    <span className="text-[12px] font-black uppercase tracking-[0.2em] text-text">
                       {sessionType === 'work' ? (ACTIVITY_MAP[sessionMetadata.activity_type as keyof typeof ACTIVITY_MAP]?.label || 'Concentrating') : (sessionType === 'long_break' ? 'Deep Rest' : 'Resting')}
                     </span>
                   </div>
+
+                  <p className="text-[12px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2 opacity-80">
+                    <span className="material-symbols-rounded text-base">schedule</span>
+                    Expected Finish: <span className="text-text font-black">{targetEndTime ? new Date(targetEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
+                  </p>
                 </div>
-                
-                <p className="text-[11px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
-                  <span className="material-symbols-rounded text-sm">schedule</span>
-                  Expected Finish: <span className="text-text">{targetEndTime ? new Date(targetEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
-                </p>
               </div>
             </div>
           </div>
@@ -487,101 +478,18 @@ export function TimerPage() {
           </div>
         </div>
 
-        {/* Right Panel: Sticky Note + Scrollable Queue */}
-        <div className="hidden lg:flex lg:col-span-4 flex-col h-full pt-1 pb-12 gap-6 overflow-hidden">
-          
-          {/* Layer 1: Sticky Note (Fixed at top of panel) */}
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-between mb-2 px-1">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Sticky Note</h4>
-              <span className="material-symbols-rounded text-base text-amber-400">push_pin</span>
-            </div>
-            <div className="bg-amber-100/40 dark:bg-amber-900/20 border border-amber-300/40 dark:border-amber-800/40 p-5 rounded-3xl shadow-sm relative group transition-all hover:shadow-md">
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-40 transition-opacity">
-                <span className="material-symbols-rounded text-base text-amber-900 dark:text-amber-100">edit_note</span>
-              </div>
-              <p className="text-[10px] font-black text-amber-900/80 dark:text-amber-200 uppercase tracking-[0.2em] mb-3">Goal Objective</p>
-              <textarea 
-                className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] font-bold text-amber-950 dark:text-amber-50 resize-none placeholder:text-amber-900/25 dark:placeholder:text-amber-200/20 leading-relaxed no-scrollbar"
-                placeholder="Write your session focus here..."
-                rows={3}
-                value={stickyNote}
-                onChange={(e) => setStickyNote(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Layer 2: Smart Queue (Scrollable) */}
-          <div className="flex-1 flex flex-col min-h-0 relative">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Audio Queue</h4>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 -mr-2 no-scrollbar space-y-4 pb-20 relative">
-              {loadingTracks ? (
-                <div className="py-20 flex flex-col items-center justify-center gap-4">
-                  <span className="material-symbols-rounded animate-spin text-primary-500 text-3xl">refresh</span>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Loading Tracks...</p>
-                </div>
-              ) : upcomingTracks.map((track) => (
-                <div 
-                  key={track._id} 
-                  onClick={() => playTrack(track)}
-                  className={`bg-surface border p-4 rounded-2xl shadow-sm transition-all group cursor-pointer hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-4 ${
-                    currentTrack?._id === track._id ? 'border-primary-500 ring-4 ring-primary-500/5' : 'border-border hover:border-primary-400/50'
-                  }`}
-                >
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all shadow-inner overflow-hidden relative ${
-                    currentTrack?._id === track._id && isPlaying ? 'bg-primary-500 text-white' : 'bg-bg text-text-muted group-hover:bg-primary-500 group-hover:text-white'
-                  }`}>
-                    {currentTrack?._id === track._id && isPlaying ? (
-                       <div className="flex items-end gap-[2px] h-4">
-                          <div className="w-1 bg-white animate-[music-bar_0.6s_ease-in-out_infinite] h-2"></div>
-                          <div className="w-1 bg-white animate-[music-bar_0.8s_ease-in-out_infinite] h-4"></div>
-                          <div className="w-1 bg-white animate-[music-bar_0.7s_ease-in-out_infinite] h-3"></div>
-                       </div>
-                    ) : (
-                      <span className="material-symbols-rounded text-3xl">
-                        graphic_eq
-                      </span>
-                    )}
-                    <div className="absolute inset-0 bg-primary-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h5 className="font-black text-text text-[15px] truncate group-hover:text-primary-500 transition-colors">
-                        {track.title}
-                      </h5>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-text-muted truncate uppercase tracking-widest">{track.category}</p>
-                      <div className="w-16 h-1 bg-bg rounded-full overflow-hidden">
-                        <div className="h-full bg-primary-500 rounded-full" style={{ width: `${track.match}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button className="w-full py-5 border-2 border-dashed border-border rounded-2xl text-[11px] font-black text-text-muted hover:border-primary-500/50 hover:text-primary-500 transition-all flex items-center justify-center gap-2 group">
-                <span className="material-symbols-rounded text-lg group-hover:rotate-180 transition-transform">refresh</span>
-                Regenerate Recommendations
-              </button>
-            </div>
-
-            {/* Bottom Blur Mask (Indicates more scroll) */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg via-bg/80 to-transparent pointer-events-none z-10 backdrop-blur-[2px] opacity-90"></div>
-          </div>
-        </div>
       </div>
 
-      <div className={`absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[100%] h-[60%] blur-[160px] rounded-full pointer-events-none transition-all duration-1000 ${
-        isPlaying ? 'opacity-30 scale-110' : 'opacity-10 scale-100'
-      } ${sessionType === 'work' ? 'bg-primary-500 animate-pulse-slow' : (sessionType === 'long_break' ? 'bg-amber-500' : 'bg-info')}`}></div>
-
-      <div className="absolute inset-0 pointer-events-none z-0">
-         <AuraVisualizer color={sessionType === 'work' ? '#10b981' : (sessionType === 'long_break' ? '#f59e0b' : '#3b82f6')} />
+      {/* Constraints-Friendly Static Aura Background */}
+      <div className="absolute inset-x-0 bottom-0 h-[70vh] pointer-events-none z-0 overflow-hidden select-none">
+        <img 
+          src="/assets/images/focus-aura.png" 
+          alt="" 
+          className={`w-full h-full object-cover object-top opacity-30 transition-all duration-1000 ${
+            isPlaying ? 'scale-110 blur-sm' : 'scale-100 blur-md'
+          }`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent" />
       </div>
 
       {showCelebration && (
