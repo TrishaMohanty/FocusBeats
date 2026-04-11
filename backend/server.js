@@ -38,9 +38,13 @@ app.use(morgan('dev'));
 // });
 // app.use('/api/', limiter);
 
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://focus-beats.vercel.app'] 
-  : ['https://focus-beats.vercel.app', 'http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'https://focus-beats.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174'
+];
 
 app.use(cors({
   origin: allowedOrigins,
