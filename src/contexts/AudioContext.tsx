@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { api as apiClient } from '../lib/api';
+import { useAuth } from './AuthContext';
 
 interface Track {
   _id: string;
@@ -109,7 +110,10 @@ const DEMO_TRACKS: Track[] = [
 
 const AudioReactContext = createContext<AudioContextType | undefined>(undefined);
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading: authLoading } = useAuth();
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(() => {
@@ -151,23 +155,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
 
-    // Initial load of music library
-    const loadLibrary = async () => {
-      setLoading(true);
-      try {
-        const data = await apiClient.get('/music');
-        const fetchedTracks = Array.isArray(data) ? data : [];
-        // Combine fetched tracks with demo tracks, avoiding duplicates if needed
-        setAllTracks([...DEMO_TRACKS, ...fetchedTracks.filter(t => !DEMO_TRACKS.some(d => d.title === t.title))]);
-      } catch (err) {
-        console.error('Failed to preload music library:', err);
-        setAllTracks([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadLibrary();
-
+    // Initial setup ends here
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -178,6 +166,42 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     };
   }, []);
+
+  // Separate effect for loading library when user is authenticated
+  useEffect(() => {
+    const loadLibrary = async () => {
+      if (authLoading) return;
+      if (!user) {
+        // If not logged in, we stay with DEMO_TRACKS
+        setAllTracks(DEMO_TRACKS);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const data = await apiClient.get('/music');
+        const fetchedTracks = (Array.isArray(data) ? data : []).map((t: any) => ({
+          ...t,
+          // Correct relative URLs to absolute URLs using backend base
+          embed_url: t.embed_url?.startsWith('/') 
+            ? `${API_BASE_URL}${t.embed_url}` 
+            : t.embed_url
+        }));
+
+        // Combine fetched tracks with demo tracks, avoiding duplicates
+        const combined = [...DEMO_TRACKS, ...fetchedTracks.filter(t => !DEMO_TRACKS.some(d => d.title === t.title))];
+        setAllTracks(combined);
+      } catch (err) {
+        console.error('Failed to preload music library:', err);
+        // Fallback to demo tracks on error instead of clearing everything
+        setAllTracks(DEMO_TRACKS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLibrary();
+  }, [user, authLoading]);
 
   // Update volume on audio element
   useEffect(() => {
@@ -233,8 +257,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       // If already playing something else, fade out or just switch
-      audioRef.current.src = track.embed_url;
-      audioRef.current.play().catch(console.error);
+      let finalUrl = track.embed_url;
+      if (finalUrl.startsWith('/')) {
+        finalUrl = `${API_BASE_URL}${finalUrl}`;
+      }
+
+      audioRef.current.src = finalUrl;
+      audioRef.current.play().catch(err => {
+        console.error('Playback failed:', err);
+        // If it's a relative path error or similar, maybe it was missing the base
+      });
       setCurrentTrack(track);
       setIsPlaying(true);
       

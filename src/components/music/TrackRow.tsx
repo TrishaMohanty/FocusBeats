@@ -5,9 +5,11 @@ interface TrackRowProps {
   track: {
     _id: string;
     title: string;
-    station: string;
+    station?: string;
     category: string;
     focus_level: string;
+    activity_type: string;
+    embed_url: string;
   };
 }
 

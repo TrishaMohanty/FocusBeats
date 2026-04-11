@@ -40,7 +40,7 @@ app.use(morgan('dev'));
 
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? ['https://focus-beats.vercel.app'] 
-  : ['https://focus-beats.vercel.app', 'http://localhost:5173'];
+  : ['https://focus-beats.vercel.app', 'http://localhost:5173', 'http://localhost:5174'];
 
 app.use(cors({
   origin: allowedOrigins,

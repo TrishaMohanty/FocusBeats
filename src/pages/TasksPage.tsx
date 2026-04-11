@@ -132,7 +132,7 @@ export function TasksPage() {
                   <span className="material-symbols-rounded text-3xl">inventory_2</span>
                 </div>
                 <h4 className="text-lg font-black text-text mb-1">Board is Clear</h4>
-                <p className="text-sm text-text-muted font-bold max-w-xs">All missions completed. Ready for a new challenge?</p>
+                <p className="text-sm text-text-muted font-bold">All missions completed. Ready for a new challenge?</p>
               </div>
             ) : (
               <div className="grid gap-4">

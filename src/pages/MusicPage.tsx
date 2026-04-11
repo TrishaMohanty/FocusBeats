@@ -1,28 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../lib/api';
+import { useAudio } from '../contexts/AudioContext';
 import { useNavigate } from 'react-router-dom';
 import { TrackRow } from '../components/music/TrackRow';
 
 export function MusicPage() {
   const { user } = useAuth();
+  const { allTracks: tracks, loading } = useAudio();
   const navigate = useNavigate();
-  const [tracks, setTracks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    setLoading(true);
-    api.get('/music')
-      .then(setTracks)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
 
   const filteredTracks = tracks.filter(t => 
     t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.station.toLowerCase().includes(searchQuery.toLowerCase())
+    (t.station?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   return (
