@@ -8,7 +8,7 @@ interface AuraVisualizerProps {
 export function AuraVisualizer({ color = '#10b981' }: AuraVisualizerProps) {
   const { analyser, isPlaying } = useAudio();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
 
   useEffect(() => {
     if (!canvasRef.current || !analyser) return;

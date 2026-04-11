@@ -26,7 +26,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security & Logging Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(morgan('dev'));
 
 // const limiter = rateLimit({
@@ -45,6 +47,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use('/music', express.static('public/music'));
+app.use(express.static('public')); // General static files
 
 // Routes
 app.use('/api/auth', authRoutes);

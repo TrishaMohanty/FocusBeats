@@ -57,13 +57,35 @@ export function TimerPage() {
     }
   };
 
-  const { isPlaying, togglePlay, fadeVolume } = useAudio();
+  const { isPlaying, togglePlay, fadeVolume, playSmart, currentTrack } = useAudio();
   const [sessionMetadata, setSessionMetadata] = useState<any>(getInitialSession());
   const [showCelebration, setShowCelebration] = useState(false);
   const [sessionType, setSessionType] = useState<'work' | 'short_break' | 'long_break'>(() => {
     const saved = localStorage.getItem('focusbeats_session_type');
     return (saved as any) || 'work';
   });
+
+  const [isRunning, setIsRunning] = useState(() => {
+    const saved = localStorage.getItem('focusbeats_timer_is_running');
+    return saved === null ? true : saved === 'true';
+  });
+
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [targetEndTime, setTargetEndTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem('focusbeats_target_end_time');
+    return saved ? parseInt(saved, 10) : null;
+  });
+
+  const [stickyNote] = useState(() => {
+    return localStorage.getItem('focusbeats_timer_note') || "";
+  });
+
+  // Auto-play music on work start
+  useEffect(() => {
+    if (isRunning && sessionType === 'work' && !isPlaying) {
+      playSmart(sessionMetadata.activity_type);
+    }
+  }, [isRunning, sessionType, sessionMetadata.activity_type, isPlaying]);
 
   // Phase-Aware Music: Pause during breaks
   useEffect(() => {
@@ -106,20 +128,6 @@ export function TimerPage() {
     setTimeLeft(prev => prev + minutes * 60);
     window.dispatchEvent(new Event('timer_state_change'));
   };
-
-  const [isRunning, setIsRunning] = useState(() => {
-    const saved = localStorage.getItem('focusbeats_timer_is_running');
-    return saved === null ? true : saved === 'true';
-  });
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [targetEndTime, setTargetEndTime] = useState<number | null>(() => {
-    const saved = localStorage.getItem('focusbeats_target_end_time');
-    return saved ? parseInt(saved, 10) : null;
-  });
-
-  const [stickyNote] = useState(() => {
-    return localStorage.getItem('focusbeats_timer_note') || "";
-  });
 
   useEffect(() => {
     localStorage.setItem('focusbeats_timer_note', stickyNote);
@@ -312,12 +320,9 @@ export function TimerPage() {
     if (user && actualDuration > 0) {
       try {
         const result = await api.post('/sessions', {
+          ...sessionMetadata,
           duration_minutes: actualDuration,
           session_type: sessionType,
-          activity_type: sessionMetadata.activity_type,
-          focus_level: sessionMetadata.focus_level,
-          task_name: sessionMetadata.task_name,
-          task_id: sessionMetadata.task_id,
           notes: stickyNote || null,
           completed: isAutoEnd
         });
@@ -477,6 +482,48 @@ export function TimerPage() {
             </button>
           </div>
         </div>
+        
+        {/* Now Playing - Premium Glassmorphism Card */}
+        {currentTrack && (
+          <div className="absolute bottom-10 left-10 max-w-[300px] z-30 animate-in slide-in-from-left-10 duration-700">
+            <div className="bg-surface/30 backdrop-blur-2xl border border-white/10 p-4 rounded-3xl flex items-center gap-4 shadow-2xl group/music shadow-black/20">
+              <div className="w-12 h-12 bg-primary-500/10 rounded-2xl flex items-center justify-center border border-primary-500/20 relative overflow-hidden">
+                {isPlaying ? (
+                  <div className="flex items-end gap-[2px] h-5 mb-1">
+                    <div className="w-[3px] bg-primary-500 animate-[music-bar_0.6s_ease-in-out_infinite] h-2"></div>
+                    <div className="w-[3px] bg-primary-500 animate-[music-bar_0.8s_ease-in-out_infinite] h-5"></div>
+                    <div className="w-[3px] bg-primary-500 animate-[music-bar_0.7s_ease-in-out_infinite] h-3"></div>
+                    <div className="w-[3px] bg-primary-500 animate-[music-bar_0.9s_ease-in-out_infinite] h-4"></div>
+                  </div>
+                ) : (
+                  <span className="material-symbols-rounded text-primary-500 text-2xl opacity-60">music_note</span>
+                )}
+              </div>
+              <div className="flex flex-col min-w-0 pr-2">
+                <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.2em] mb-0.5 opacity-80">
+                  {currentTrack.station || 'Focus Station'}
+                </span>
+                <h4 className="text-sm font-black text-text truncate leading-tight group-hover/music:text-primary-500 transition-colors">
+                  {currentTrack.title}
+                </h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-primary-500 animate-pulse' : 'bg-text-muted'}`}></span>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+                    {isPlaying ? 'Flowing' : 'Paused'}
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={togglePlay}
+                className="w-10 h-10 rounded-full bg-surface/50 border border-white/10 flex items-center justify-center text-text hover:bg-primary-500 hover:text-white transition-all active:scale-90"
+              >
+                <span className="material-symbols-rounded text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {isPlaying ? 'pause' : 'play_arrow'}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
 

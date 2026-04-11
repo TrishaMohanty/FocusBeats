@@ -51,6 +51,18 @@
   /* Animation Tokens */
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float: float 3s ease-in-out infinite;
+  --animate-breathe: breathe 8s ease-in-out infinite;
+  --animate-waveform: waveform 1s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes waveform {
+  0%, 100% { height: 20%; }
+  50% { height: 80%; }
 }
 
 @keyframes float {

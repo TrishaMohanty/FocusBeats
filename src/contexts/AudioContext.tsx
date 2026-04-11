@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { api as apiClient } from '../lib/api';
 
 interface Track {
   _id: string;
@@ -31,7 +32,82 @@ interface AudioContextType {
   analyser: AnalyserNode | null;
 }
 
-const AudioContext = createContext<AudioContextType | undefined>(undefined);
+const DEMO_TRACKS: Track[] = [
+  {
+    _id: 'demo-1',
+    title: 'Flower Cup',
+    station: 'Lofi Vibes',
+    category: 'lofi',
+    focus_level: 'low',
+    activity_type: 'coding',
+    embed_url: 'http://localhost:5000/music/Lukrembo%20-%20Flower%20Cup%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-2',
+    title: 'Midnight',
+    station: 'Deep Focus',
+    category: 'ambient',
+    focus_level: 'high',
+    activity_type: 'debugging',
+    embed_url: 'http://localhost:5000/music/massobeats%20-%20midnight%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-3',
+    title: 'Little Voices',
+    station: 'Gentle Flow',
+    category: 'lofi',
+    focus_level: 'medium',
+    activity_type: 'writing',
+    embed_url: 'http://localhost:5000/music/Amine%20Maxwell%20-%20Little%20Voices%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-4',
+    title: 'A Beautiful Garden',
+    station: 'Nature Focus',
+    category: 'ambient',
+    focus_level: 'low',
+    activity_type: 'reading',
+    embed_url: 'http://localhost:5000/music/Aventure%20-%20A%20Beautiful%20Garden%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-5',
+    title: 'Meditation',
+    station: 'Zen Mode',
+    category: 'pianos',
+    focus_level: 'high',
+    activity_type: 'testing',
+    embed_url: 'http://localhost:5000/music/Aylex%20-%20Meditation%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-6',
+    title: 'Florida Keys',
+    station: 'Chill Beats',
+    category: 'lofi',
+    focus_level: 'medium',
+    activity_type: 'planning',
+    embed_url: 'http://localhost:5000/music/Hoffy%20Beats%20-%20Florida%20Keys%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-7',
+    title: 'Honey Jam',
+    station: 'Sweet Focus',
+    category: 'lofi',
+    focus_level: 'low',
+    activity_type: 'documentation',
+    embed_url: 'http://localhost:5000/music/massobeats%20-%20honey%20jam%20(freetouse.com).mp3'
+  },
+  {
+    _id: 'demo-8',
+    title: 'Peach Prosecco',
+    station: 'Sunset Studio',
+    category: 'lofi',
+    focus_level: 'medium',
+    activity_type: 'coding',
+    embed_url: 'http://localhost:5000/music/massobeats%20-%20peach%20prosecco%20(freetouse.com).mp3'
+  }
+];
+
+const AudioReactContext = createContext<AudioContextType | undefined>(undefined);
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -42,7 +118,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playlist, setPlaylistState] = useState<Track[]>([]);
-  const [allTracks, setAllTracks] = useState<Track[]>([]);
+  const [allTracks, setAllTracks] = useState<Track[]>(DEMO_TRACKS);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
   
@@ -79,11 +155,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const loadLibrary = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/music`);
-        const data = await response.json();
-        setAllTracks(data);
+        const data = await apiClient.get('/music');
+        const fetchedTracks = Array.isArray(data) ? data : [];
+        // Combine fetched tracks with demo tracks, avoiding duplicates if needed
+        setAllTracks([...DEMO_TRACKS, ...fetchedTracks.filter(t => !DEMO_TRACKS.some(d => d.title === t.title))]);
       } catch (err) {
         console.error('Failed to preload music library:', err);
+        setAllTracks([]);
       } finally {
         setLoading(false);
       }
@@ -144,7 +222,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (audioRef.current) {
       initAudioContext();
       
-      if (currentTrack?._id === track._id) {
+      const isSameTrack = currentTrack?._id === track._id;
+      
+      if (isSameTrack) {
         if (!isPlaying) {
            audioRef.current.play().catch(console.error);
            setIsPlaying(true);
@@ -152,6 +232,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
 
+      // If already playing something else, fade out or just switch
       audioRef.current.src = track.embed_url;
       audioRef.current.play().catch(console.error);
       setCurrentTrack(track);
@@ -178,7 +259,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const playSmart = (activityType: string) => {
-    if (allTracks.length === 0) return;
+    if (!activityType) return;
+    
+    // If library still loading, retry once in 1s
+    if (loading || (!Array.isArray(allTracks) || allTracks.length === 0)) {
+        setTimeout(() => playSmart(activityType), 1500);
+        return;
+    }
     
     // Normalize activity type
     const activity = activityType.toLowerCase();
@@ -192,11 +279,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Fallback logic if no exact activity match
     if (filtered.length === 0) {
       if (['coding', 'debugging', 'testing', 'refactoring'].includes(activity)) {
-        filtered = allTracks.filter(t => t.category === 'cyberpunk' || t.category === 'lofi');
+        filtered = allTracks.filter(t => t.category === 'lofi');
       } else if (['writing', 'documentation', 'reading'].includes(activity)) {
         filtered = allTracks.filter(t => t.category === 'ambient');
       } else {
-        filtered = [allTracks[0]]; // Final fallback
+        filtered = allTracks.length > 0 ? [allTracks[Math.floor(Math.random() * allTracks.length)]] : [];
       }
     }
 
@@ -239,7 +326,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <AudioContext.Provider value={{
+    <AudioReactContext.Provider value={{
       currentTrack,
       isPlaying,
       volume,
@@ -260,12 +347,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       analyser: analyserRef.current
     }}>
       {children}
-    </AudioContext.Provider>
+    </AudioReactContext.Provider>
   );
 };
 
 export const useAudio = () => {
-  const context = useContext(AudioContext);
+  const context = useContext(AudioReactContext);
   if (context === undefined) {
     throw new Error('useAudio must be used within an AudioProvider');
   }

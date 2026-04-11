@@ -10,6 +10,24 @@ const studySessionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  total_goal_minutes: {
+    type: Number,
+  },
+  is_infinity: {
+    type: Boolean,
+    default: false,
+  },
+  mode: {
+    type: String,
+    enum: ['focused', 'pomodoro', 'infinity'],
+    default: 'focused'
+  },
+  current_cycle: {
+    type: Number,
+  },
+  total_cycles: {
+    type: Number,
+  },
   session_type: {
     type: String,
     enum: ['work', 'short_break', 'long_break'],
@@ -37,6 +55,10 @@ const studySessionSchema = new mongoose.Schema({
   task_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task',
+  },
+  completed: {
+    type: Boolean,
+    default: false,
   },
   completed_at: {
     type: Date,

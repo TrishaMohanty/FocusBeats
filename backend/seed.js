@@ -6,56 +6,79 @@ dotenv.config();
 
 const tracks = [
   {
-    title: "Syntax Error",
+    title: "Flower Cup",
     category: "lofi",
-    focus_level: "high",
-    activity_type: "coding",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-  },
-  {
-    title: "Deep Logic",
-    category: "ambient",
-    focus_level: "high",
-    activity_type: "coding",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  },
-  {
-    title: "Midnight Compile",
-    category: "lofi",
+    station: "Lukrembo",
     focus_level: "medium",
     activity_type: "coding",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    embed_url: "/music/Lukrembo - Flower Cup (freetouse.com).mp3"
   },
   {
-    title: "Quiet Pages",
+    title: "Midnight",
+    category: "lofi",
+    station: "Massobeats",
+    focus_level: "high",
+    activity_type: "debugging",
+    embed_url: "/music/massobeats - midnight (freetouse.com).mp3"
+  },
+  {
+    title: "Honey Jam",
+    category: "lofi",
+    station: "Massobeats",
+    focus_level: "low",
+    activity_type: "planning",
+    embed_url: "/music/massobeats - honey jam (freetouse.com).mp3"
+  },
+  {
+    title: "Little Voices",
     category: "ambient",
+    station: "Amine Maxwell",
     focus_level: "low",
     activity_type: "reading",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+    embed_url: "/music/Amine Maxwell - Little Voices (freetouse.com).mp3"
   },
   {
-    title: "The Librarian",
-    category: "classical",
-    focus_level: "medium",
-    activity_type: "reading",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"
-  },
-  {
-    title: "Focus Rain",
+    title: "A Beautiful Garden",
     category: "ambient",
+    station: "Aventure",
+    focus_level: "medium",
+    activity_type: "writing",
+    embed_url: "/music/Aventure - A Beautiful Garden (freetouse.com).mp3"
+  },
+  {
+    title: "Meditation",
+    category: "nature",
+    station: "Aylex",
     focus_level: "high",
-    activity_type: "revision",
-    embed_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+    activity_type: "brainstorming",
+    embed_url: "/music/Aylex - Meditation (freetouse.com).mp3"
+  },
+  {
+    title: "Florida Keys",
+    category: "lofi",
+    station: "Hoffy Beats",
+    focus_level: "medium",
+    activity_type: "research",
+    embed_url: "/music/Hoffy Beats - Florida Keys (freetouse.com).mp3"
+  },
+  {
+    title: "Peach Prosecco",
+    category: "lofi",
+    station: "Massobeats",
+    focus_level: "medium",
+    activity_type: "analysis",
+    embed_url: "/music/massobeats - peach prosecco (freetouse.com).mp3"
   }
 ];
 
 const seedDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB for seeding...');
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/focusbeats');
+    console.log(`Connected to MongoDB: ${conn.connection.host}`);
 
     // Clear existing tracks
     await MusicTrack.deleteMany({});
+    console.log('Cleared existing tracks...');
     
     // Insert new tracks
     await MusicTrack.insertMany(tracks);
