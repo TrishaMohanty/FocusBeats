@@ -35,7 +35,7 @@ export function AuthPage() {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to sign in');
+      setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export function AuthPage() {
       await signUp(email, password, displayName);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create account');
+      setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -137,9 +137,11 @@ export function AuthPage() {
                 <div className={`w-1/2 transition-opacity duration-500 ${isLogin ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                   <form onSubmit={handleLogin} className="space-y-6  mx-auto lg:mx-0">
                     {error && isLogin && (
-                      <div className="p-3 bg-error/10 border border-error/20 text-error rounded-xl text-xs font-bold flex items-center gap-2">
-                        <span className="material-symbols-rounded text-sm">error</span>
-                        {error}
+                      <div className="p-4 bg-error/5 border-l-4 border-error text-error rounded-r-2xl text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm mb-2">
+                        <div className="flex-shrink-0 w-8 h-8 bg-error/10 rounded-full flex items-center justify-center">
+                          <span className="material-symbols-rounded text-base">warning</span>
+                        </div>
+                        <p className="flex-1">{error}</p>
                       </div>
                     )}
                     <div className="space-y-4">
@@ -187,9 +189,11 @@ export function AuthPage() {
                 <div className={`w-1/2 transition-opacity duration-500 ${!isLogin ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                   <form onSubmit={handleRegister} className="space-y-5  mx-auto lg:mx-0">
                     {error && !isLogin && (
-                      <div className="p-3 bg-error/10 border border-error/20 text-error rounded-xl text-xs font-bold flex items-center gap-2">
-                        <span className="material-symbols-rounded text-sm">error</span>
-                        {error}
+                      <div className="p-4 bg-error/5 border-l-4 border-error text-error rounded-r-2xl text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm mb-2">
+                        <div className="flex-shrink-0 w-8 h-8 bg-error/10 rounded-full flex items-center justify-center">
+                          <span className="material-symbols-rounded text-base">warning</span>
+                        </div>
+                        <p className="flex-1">{error}</p>
                       </div>
                     )}
                     <div className="space-y-4">

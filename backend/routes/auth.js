@@ -88,7 +88,7 @@ router.post('/login', validate(loginSchema), asyncHandler(async (req, res) => {
   if (!user) {
     logger.warn(`Login failed: User not found for email ${email}`);
     res.status(401);
-    throw new Error('Invalid credentials');
+    throw new Error('User not found. Please register or check your email.');
   }
 
   logger.debug(`User found: ${user.email}. Attempting password comparison...`);
@@ -106,7 +106,7 @@ router.post('/login', validate(loginSchema), asyncHandler(async (req, res) => {
   } else {
     logger.warn(`Login failed: Password mismatch for user ${email}`);
     res.status(401);
-    throw new Error('Invalid credentials');
+    throw new Error('Incorrect password. Please try again.');
   }
 }));
 

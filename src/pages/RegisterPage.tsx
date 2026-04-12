@@ -17,7 +17,7 @@ export function RegisterPage() {
       await signUp(email, password, displayName);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create account');
+      setError(err.message || 'Failed to create account');
     }
   };
 
@@ -37,8 +37,11 @@ export function RegisterPage() {
         <div className="bg-surface py-8 px-4 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.1)] border border-border sm:rounded-2xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="p-sm bg-error/10 border border-error/20 text-error rounded-lg text-sm text-center font-medium">
-                {error}
+              <div className="p-4 bg-error/5 border-l-4 border-error text-error rounded-r-2xl text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm mb-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-error/10 rounded-full flex items-center justify-center">
+                  <span className="material-symbols-rounded text-base">warning</span>
+                </div>
+                <p className="flex-1 text-left">{error}</p>
               </div>
             )}
 
