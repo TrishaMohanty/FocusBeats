@@ -44,7 +44,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use('/music', express.static('public/music'));
 app.use(express.static('public')); // General static files
 
 // Routes
