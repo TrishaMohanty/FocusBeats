@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import { api as apiClient } from '../lib/api';
 import { useAuth } from './AuthContext';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 interface Track {
   _id: string;
   title: string;
@@ -41,7 +43,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'lofi',
     focus_level: 'low',
     activity_type: 'coding',
-    embed_url: 'http://localhost:5000/music/Lukrembo%20-%20Flower%20Cup%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/Lukrembo%20-%20Flower%20Cup%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-2',
@@ -50,7 +52,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'ambient',
     focus_level: 'high',
     activity_type: 'debugging',
-    embed_url: 'http://localhost:5000/music/massobeats%20-%20midnight%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/massobeats%20-%20midnight%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-3',
@@ -59,7 +61,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'lofi',
     focus_level: 'medium',
     activity_type: 'writing',
-    embed_url: 'http://localhost:5000/music/Amine%20Maxwell%20-%20Little%20Voices%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/Amine%20Maxwell%20-%20Little%20Voices%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-4',
@@ -68,7 +70,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'ambient',
     focus_level: 'low',
     activity_type: 'reading',
-    embed_url: 'http://localhost:5000/music/Aventure%20-%20A%20Beautiful%20Garden%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/Aventure%20-%20A%20Beautiful%20Garden%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-5',
@@ -77,7 +79,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'pianos',
     focus_level: 'high',
     activity_type: 'testing',
-    embed_url: 'http://localhost:5000/music/Aylex%20-%20Meditation%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/Aylex%20-%20Meditation%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-6',
@@ -86,7 +88,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'lofi',
     focus_level: 'medium',
     activity_type: 'planning',
-    embed_url: 'http://localhost:5000/music/Hoffy%20Beats%20-%20Florida%20Keys%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/Hoffy%20Beats%20-%20Florida%20Keys%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-7',
@@ -95,7 +97,7 @@ const DEMO_TRACKS: Track[] = [
     category: 'lofi',
     focus_level: 'low',
     activity_type: 'documentation',
-    embed_url: 'http://localhost:5000/music/massobeats%20-%20honey%20jam%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/massobeats%20-%20honey%20jam%20(freetouse.com).mp3`
   },
   {
     _id: 'demo-8',
@@ -104,13 +106,11 @@ const DEMO_TRACKS: Track[] = [
     category: 'lofi',
     focus_level: 'medium',
     activity_type: 'coding',
-    embed_url: 'http://localhost:5000/music/massobeats%20-%20peach%20prosecco%20(freetouse.com).mp3'
+    embed_url: `${BASE_URL}/music/massobeats%20-%20peach%20prosecco%20(freetouse.com).mp3`
   }
 ];
 
 const AudioReactContext = createContext<AudioContextType | undefined>(undefined);
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading: authLoading } = useAuth();
@@ -184,7 +184,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           ...t,
           // Correct relative URLs to absolute URLs using backend base
           embed_url: t.embed_url?.startsWith('/') 
-            ? `${API_BASE_URL}${t.embed_url}` 
+            ? `${BASE_URL}${t.embed_url}` 
             : t.embed_url
         }));
 
@@ -259,7 +259,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // If already playing something else, fade out or just switch
       let finalUrl = track.embed_url;
       if (finalUrl.startsWith('/')) {
-        finalUrl = `${API_BASE_URL}${finalUrl}`;
+        finalUrl = `${BASE_URL}${finalUrl}`;
       }
 
       audioRef.current.src = finalUrl;
