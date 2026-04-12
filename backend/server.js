@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -52,9 +53,22 @@ app.use('/api/analytics', analyticsRoutes);
 
 // Base route for health check
 app.get('/health', (req, res) => {
+  const dbStateMap = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+
   res.json({
     status: 'ok',
     message: 'FocusBeats API is running...',
+    database: {
+      state: dbStateMap[mongoose.connection.readyState] || 'unknown',
+      host: mongoose.connection.host || null,
+      port: mongoose.connection.port || null,
+      name: mongoose.connection.name || null,
+    },
   });
 });
 
