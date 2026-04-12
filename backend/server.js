@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -38,22 +37,6 @@ app.use(morgan('dev'));
 // });
 // app.use('/api/', limiter);
 
-const allowedOrigins = [
-  'https://focus-beats.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:5174',
-  'http://localhost:4173',
-  'http://localhost:4174',
-  'http://127.0.0.1:4173',
-  'http://127.0.0.1:4174'
-];
-
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
 app.use(express.json());
 app.use('/music', express.static('public/music'));
 app.use(express.static('public')); // General static files
@@ -72,6 +55,15 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'FocusBeats API is running...',
+  });
+});
+
+// Root route for direct requests and CORS checks
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Welcome to the FocusBeats backend',
+    origin: req.headers.origin || null,
   });
 });
 
