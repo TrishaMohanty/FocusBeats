@@ -2,7 +2,13 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import { api as apiClient } from '../lib/api';
 import { useAuth } from './AuthContext';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+// Debug logging utility
+const DEBUG = true;
+const log = {
+  info: (msg: string, data?: any) => DEBUG && console.log(`[AudioContext] ℹ️ ${msg}`, data || ''),
+  error: (msg: string, error?: any) => console.error(`[AudioContext] ❌ ${msg}`, error || ''),
+  warn: (msg: string, data?: any) => console.warn(`[AudioContext] ⚠️ ${msg}`, data || '')
+};
 
 interface Track {
   _id: string;
@@ -35,80 +41,7 @@ interface AudioContextType {
   analyser: AnalyserNode | null;
 }
 
-const DEMO_TRACKS: Track[] = [
-  {
-    _id: 'demo-1',
-    title: 'Flower Cup',
-    station: 'Lofi Vibes',
-    category: 'lofi',
-    focus_level: 'low',
-    activity_type: 'coding',
-    embed_url: `${BASE_URL}/music/Lukrembo%20-%20Flower%20Cup%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-2',
-    title: 'Midnight',
-    station: 'Deep Focus',
-    category: 'ambient',
-    focus_level: 'high',
-    activity_type: 'debugging',
-    embed_url: `${BASE_URL}/music/massobeats%20-%20midnight%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-3',
-    title: 'Little Voices',
-    station: 'Gentle Flow',
-    category: 'lofi',
-    focus_level: 'medium',
-    activity_type: 'writing',
-    embed_url: `${BASE_URL}/music/Amine%20Maxwell%20-%20Little%20Voices%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-4',
-    title: 'A Beautiful Garden',
-    station: 'Nature Focus',
-    category: 'ambient',
-    focus_level: 'low',
-    activity_type: 'reading',
-    embed_url: `${BASE_URL}/music/Aventure%20-%20A%20Beautiful%20Garden%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-5',
-    title: 'Meditation',
-    station: 'Zen Mode',
-    category: 'pianos',
-    focus_level: 'high',
-    activity_type: 'testing',
-    embed_url: `${BASE_URL}/music/Aylex%20-%20Meditation%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-6',
-    title: 'Florida Keys',
-    station: 'Chill Beats',
-    category: 'lofi',
-    focus_level: 'medium',
-    activity_type: 'planning',
-    embed_url: `${BASE_URL}/music/Hoffy%20Beats%20-%20Florida%20Keys%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-7',
-    title: 'Honey Jam',
-    station: 'Sweet Focus',
-    category: 'lofi',
-    focus_level: 'low',
-    activity_type: 'documentation',
-    embed_url: `${BASE_URL}/music/massobeats%20-%20honey%20jam%20(freetouse.com).mp3`
-  },
-  {
-    _id: 'demo-8',
-    title: 'Peach Prosecco',
-    station: 'Sunset Studio',
-    category: 'lofi',
-    focus_level: 'medium',
-    activity_type: 'coding',
-    embed_url: `${BASE_URL}/music/massobeats%20-%20peach%20prosecco%20(freetouse.com).mp3`
-  }
-];
+// Removed: Demo tracks now fetched from API only
 
 const AudioReactContext = createContext<AudioContextType | undefined>(undefined);
 
@@ -122,9 +55,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playlist, setPlaylistState] = useState<Track[]>([]);
-  const [allTracks, setAllTracks] = useState<Track[]>(DEMO_TRACKS);
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -133,16 +67,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    log.info('Initializing audio element');
+    
     // Audio Singleton
     audioRef.current = new Audio();
     const audio = audioRef.current;
     
-    // IMPORTANT for Analyser to work with external URLs
+    // IMPORTANT for Analyser to work with Cloudinary URLs
     audio.crossOrigin = "anonymous";
     
     const handleTimeUpdate = () => setProgress(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = () => {
+      log.info(`Track loaded: ${audio.duration.toFixed(2)}s`);
+      setDuration(audio.duration);
+    };
     const handleEnded = () => {
+      log.info('Track ended, playing next...');
       if (playlist.length > 0) {
         playNext();
       } else {
@@ -150,16 +90,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setProgress(0);
       }
     };
+    const handleError = (e: Event) => {
+      const error = audio.error;
+      if (error) {
+        log.error(`Audio playback error (code ${error.code}): ${error.message}`);
+        if (error.code === 4) {
+          setError('Failed to load audio file. Check the URL and network.');
+        }
+      }
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     // Initial setup ends here
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
       audio.pause();
       if (audioContextRef.current?.state !== 'closed') {
         audioContextRef.current?.close();
@@ -167,34 +118,54 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  // Separate effect for loading library when user is authenticated
+  // Effect for loading library from API
   useEffect(() => {
     const loadLibrary = async () => {
-      if (authLoading) return;
+      if (authLoading) {
+        log.info('Auth still loading...');
+        return;
+      }
+
       if (!user) {
-        // If not logged in, we stay with DEMO_TRACKS
-        setAllTracks(DEMO_TRACKS);
+        log.warn('User not authenticated, cannot load music library');
+        setError('Please log in to access music library');
+        setAllTracks([]);
         return;
       }
 
       setLoading(true);
+      setError(null);
+      
       try {
+        log.info('Fetching music library from API...');
         const data = await apiClient.get('/music');
-        const fetchedTracks = (Array.isArray(data) ? data : []).map((t: any) => ({
-          ...t,
-          // Correct relative URLs to absolute URLs using backend base
-          embed_url: t.embed_url?.startsWith('/') 
-            ? `${BASE_URL}${t.embed_url}` 
-            : t.embed_url
-        }));
+        
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid API response format');
+        }
 
-        // Combine fetched tracks with demo tracks, avoiding duplicates
-        const combined = [...DEMO_TRACKS, ...fetchedTracks.filter(t => !DEMO_TRACKS.some(d => d.title === t.title))];
-        setAllTracks(combined);
-      } catch (err) {
-        console.error('Failed to preload music library:', err);
-        // Fallback to demo tracks on error instead of clearing everything
-        setAllTracks(DEMO_TRACKS);
+        log.info(`Loaded ${data.length} track(s) from API`, data.map(t => ({ title: t.title, url: t.embed_url?.substring(0, 50) })));
+        
+        // Validate URLs
+        const validTracks = data.filter((t: Track) => {
+          const isValid = t.embed_url && typeof t.embed_url === 'string';
+          if (!isValid) {
+            log.warn(`Invalid track: missing embed_url`, t);
+          }
+          return isValid;
+        });
+
+        if (validTracks.length === 0) {
+          throw new Error('No valid tracks with URLs found');
+        }
+
+        setAllTracks(validTracks);
+        log.info(`Successfully loaded ${validTracks.length} valid track(s)`);
+      } catch (err: any) {
+        const errorMsg = err?.message || 'Failed to load music library';
+        log.error(errorMsg, err);
+        setError(errorMsg);
+        setAllTracks([]);
       } finally {
         setLoading(false);
       }
@@ -230,50 +201,69 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const togglePlay = () => {
-    if (!currentTrack) return;
+    if (!currentTrack) {
+      log.warn('togglePlay called with no current track');
+      return;
+    }
     
     initAudioContext();
     
     if (isPlaying) {
+      log.info(`Pausing: "${currentTrack.title}"`);
       audioRef.current?.pause();
     } else {
-      audioRef.current?.play().catch(console.error);
+      log.info(`Resuming: "${currentTrack.title}"`);
+      audioRef.current?.play().catch((err: any) => {
+        log.error(`Play failed: ${err.message}`, err);
+        setError(`Playback failed: ${err.message}`);
+      });
     }
     setIsPlaying(!isPlaying);
   };
 
   const playTrack = (track: Track) => {
-    if (audioRef.current) {
-      initAudioContext();
-      
-      const isSameTrack = currentTrack?._id === track._id;
-      
-      if (isSameTrack) {
-        if (!isPlaying) {
-           audioRef.current.play().catch(console.error);
-           setIsPlaying(true);
-        }
-        return;
-      }
-
-      // If already playing something else, fade out or just switch
-      let finalUrl = track.embed_url;
-      if (finalUrl.startsWith('/')) {
-        finalUrl = `${BASE_URL}${finalUrl}`;
-      }
-
-      audioRef.current.src = finalUrl;
-      audioRef.current.play().catch(err => {
-        console.error('Playback failed:', err);
-        // If it's a relative path error or similar, maybe it was missing the base
-      });
-      setCurrentTrack(track);
-      setIsPlaying(true);
-      
-      // Update index if in playlist
-      const idx = playlist.findIndex(t => t._id === track._id);
-      if (idx !== -1) setCurrentIndex(idx);
+    if (!audioRef.current) {
+      log.error('Audio element not initialized');
+      setError('Audio player not ready');
+      return;
     }
+
+    if (!track.embed_url) {
+      log.error('Track has no embed_url', track);
+      setError(`Cannot play "${track.title}": No URL found`);
+      return;
+    }
+
+    const isSameTrack = currentTrack?._id === track._id;
+    
+    if (isSameTrack) {
+      log.info(`Same track "${track.title}", resuming playback`);
+      if (!isPlaying) {
+        audioRef.current.play().catch((err: any) => {
+          log.error(`Failed to resume playback: ${err.message}`, err);
+          setError(`Playback failed: ${err.message}`);
+        });
+        setIsPlaying(true);
+      }
+      return;
+    }
+
+    log.info(`Playing track: "${track.title}" (${track.category})`, track.embed_url);
+    setCurrentTrack(track);
+    
+    // Set source and attempt playback
+    audioRef.current.src = track.embed_url;
+    
+    audioRef.current.play().catch((err: any) => {
+      log.error(`Failed to play "${track.title}": ${err.message}`, err);
+      setError(`Failed to play "${track.title}": ${err.message}`);
+    });
+    
+    setIsPlaying(true);
+    
+    // Update index if in playlist
+    const idx = playlist.findIndex(t => t._id === track._id);
+    if (idx !== -1) setCurrentIndex(idx);
   };
 
   const playNext = () => {
@@ -291,16 +281,28 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const playSmart = (activityType: string) => {
-    if (!activityType) return;
+    if (!activityType) {
+      log.warn('playSmart called with empty activityType');
+      return;
+    }
     
-    // If library still loading, retry once in 1s
-    if (loading || (!Array.isArray(allTracks) || allTracks.length === 0)) {
-        setTimeout(() => playSmart(activityType), 1500);
-        return;
+    // If library still loading, retry
+    if (loading) {
+      log.info(`Library loading, retrying playSmart for activity: ${activityType}`);
+      setTimeout(() => playSmart(activityType), 1500);
+      return;
+    }
+
+    if (!Array.isArray(allTracks) || allTracks.length === 0) {
+      log.error('No tracks available for playSmart', { trackCount: allTracks.length });
+      setError('No music tracks available. Please refresh and try again.');
+      return;
     }
     
     // Normalize activity type
     const activity = activityType.toLowerCase();
+    
+    log.info(`smartPlay searching for activity: ${activity}`);
     
     // Find matching tracks based on category or activity_type in DB
     let filtered = allTracks.filter(t => 
@@ -308,20 +310,29 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       t.category?.toLowerCase().includes(activity)
     );
 
+    log.info(`Found ${filtered.length} track(s) for activity "${activity}"`);
+
     // Fallback logic if no exact activity match
     if (filtered.length === 0) {
       if (['coding', 'debugging', 'testing', 'refactoring'].includes(activity)) {
         filtered = allTracks.filter(t => t.category === 'lofi');
+        log.info(`Fallback: using ${filtered.length} lofi track(s)`);
       } else if (['writing', 'documentation', 'reading'].includes(activity)) {
         filtered = allTracks.filter(t => t.category === 'ambient');
+        log.info(`Fallback: using ${filtered.length} ambient track(s)`);
       } else {
         filtered = allTracks.length > 0 ? [allTracks[Math.floor(Math.random() * allTracks.length)]] : [];
+        log.info(`Fallback: using random track`);
       }
     }
 
     if (filtered.length > 0) {
+      log.info(`Playing from ${filtered.length} track(s)`);
       setPlaylist(filtered);
       playTrack(filtered[0]);
+    } else {
+      log.error('No tracks found even with fallback logic');
+      setError('No matching music found for this activity.');
     }
   };
 
