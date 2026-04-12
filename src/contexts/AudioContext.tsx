@@ -26,6 +26,7 @@ interface AudioContextType {
   volume: number;
   progress: number;
   duration: number;
+  error: string | null;
   togglePlay: () => void;
   playTrack: (track: Track) => void;
   playNext: () => void;
@@ -90,8 +91,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setProgress(0);
       }
     };
-    const handleError = (e: Event) => {
-      const error = audio.error;
+    const handleError = (_e: Event) => {
+      const error = audioRef.current?.error;
       if (error) {
         log.error(`Audio playback error (code ${error.code}): ${error.message}`);
         if (error.code === 4) {
@@ -375,6 +376,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       volume,
       progress,
       duration,
+      error,
       togglePlay,
       playTrack,
       playNext,
