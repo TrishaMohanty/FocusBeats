@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
@@ -38,6 +39,10 @@ app.use(morgan('dev'));
 // });
 // app.use('/api/', limiter);
 
+app.use(cors({
+  origin: ['https://focus-beats.vercel.app', 'http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/music', express.static('public/music'));
 app.use(express.static('public')); // General static files
